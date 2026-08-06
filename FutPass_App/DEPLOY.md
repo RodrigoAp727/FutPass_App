@@ -25,6 +25,22 @@ Este documento descreve o deploy seguro para produção e os procedimentos opera
   - Como o frontend é servido no mesmo domínio/porta, o ideal em produção é manter vazio.
   - Use somente se realmente precisar liberar outra origem específica.
 
+- CORS_ALLOWED_ORIGINS
+  - Lista opcional de origens adicionais separadas por virgula.
+  - Use somente quando houver mais de um frontend oficial.
+
+- ENFORCE_ORIGIN_ON_STATE_CHANGES
+  - Quando true, rotas de escrita em /api (POST/PUT/PATCH/DELETE) exigem Origin/Referer confiavel.
+  - Em producao, recomenda-se manter true permanentemente.
+
+- RATE_LIMIT_MAX_API / RATE_LIMIT_MAX_AUTH
+  - Limita volume de requests por IP em janela de 15 minutos.
+  - `RATE_LIMIT_MAX_AUTH` deve ser mais restritivo para reduzir abuso de login.
+
+- MAX_FAILED_LOGINS / FAILED_LOGIN_WINDOW_MS
+  - Define limite de tentativas de login invalidas e tempo de bloqueio.
+  - Recomendado: 5 tentativas e janela de 900000 ms (15 min).
+
 ## 2) Obrigatório em produção: HTTPS via proxy reverso
 
 O servidor Node roda HTTP puro e deve ficar atrás de HTTPS.
@@ -40,6 +56,18 @@ Requisitos:
 - Encaminhar tráfego externo apenas em HTTPS.
 - Encaminhar header x-forwarded-proto=https até o Node.
 - Não expor porta HTTP sem proteção pública direta.
+
+## 2.1) Headers de seguranca aplicados pelo servidor
+
+O backend envia automaticamente:
+
+- Strict-Transport-Security (quando HTTPS detectado em producao)
+- X-Content-Type-Options: nosniff
+- X-Frame-Options: DENY
+- Referrer-Policy: no-referrer
+- Permissions-Policy restritiva
+- Content-Security-Policy para reduzir superficie de XSS/clickjacking
+- Cache-Control: no-store para /api
 
 ## 3) Primeiro setup do administrador-chefe
 

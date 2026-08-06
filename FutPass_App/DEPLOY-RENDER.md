@@ -22,7 +22,13 @@ Defina:
 - `NODE_ENV=production`
 - `MONGO_URI=<sua URI MongoDB Atlas>`
 - `USE_SECURE_COOKIES=true`
-- `CORS_ALLOWED_ORIGIN=` (vazio se frontend no mesmo dominio)
+- `CORS_ALLOWED_ORIGIN=https://futpass-app.onrender.com` (ou seu dominio oficial)
+- `CORS_ALLOWED_ORIGINS=` (opcional, lista separada por virgula)
+- `ENFORCE_ORIGIN_ON_STATE_CHANGES=true`
+- `RATE_LIMIT_MAX_API=600`
+- `RATE_LIMIT_MAX_AUTH=80`
+- `MAX_FAILED_LOGINS=5`
+- `FAILED_LOGIN_WINDOW_MS=900000`
 - `PORT` nao precisa definir manualmente no Render (host injeta automaticamente)
 
 ## 4. MongoDB Atlas (free tier)
@@ -31,6 +37,11 @@ Defina:
 - Crie usuario de banco
 - Em Network Access, libere IPs do Render (ou `0.0.0.0/0` com senha forte)
 - Copie URI e coloque em `MONGO_URI`
+
+Importante para longo prazo:
+
+- Evite manter `0.0.0.0/0` permanentemente no Atlas.
+- Use faixa controlada/IPs necessarios quando possivel.
 
 ## 5. Migracao inicial de dados
 
@@ -51,6 +62,8 @@ npm run migrate:json-to-mongo
 - Usuarios OK
 - Download de relatorios em memoria (`/api/relatorios-gerados/download`) OK
 - Endpoints sensiveis (`/db.json`, `/sessions.json`, `/server.js`) retornando 404
+- Preflight CORS de origem oficial retorna `access-control-allow-origin`
+- Preflight CORS de origem nao autorizada NAO retorna `access-control-allow-origin`
 
 ## 7. Regras do administrador master
 

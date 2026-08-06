@@ -31,18 +31,51 @@ const CORS_ALLOWED_ORIGIN = String(process.env.CORS_ALLOWED_ORIGIN || '').trim()
 const SESSION_COOKIE_NAME = 'futpass_session';
 const SESSION_TTL_MS = 1000 * 60 * 60 * 12;
 const INVENTORY_MOVEMENTS_LIMIT = 2000;
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
+const MAX_API_REQUESTS_PER_WINDOW = Number.parseInt(process.env.RATE_LIMIT_MAX_API || '', 10) || 600;
+const MAX_AUTH_REQUESTS_PER_WINDOW = Number.parseInt(process.env.RATE_LIMIT_MAX_AUTH || '', 10) || 80;
+const MAX_FAILED_LOGINS = Number.parseInt(process.env.MAX_FAILED_LOGINS || '', 10) || 5;
+const FAILED_LOGIN_BLOCK_WINDOW_MS = Number.parseInt(process.env.FAILED_LOGIN_WINDOW_MS || '', 10) || (15 * 60 * 1000);
+const ENFORCE_ORIGIN_ON_STATE_CHANGES = IS_PRODUCTION || String(process.env.ENFORCE_ORIGIN_ON_STATE_CHANGES || '').trim() === 'true';
 const sessions = new Map();
+const requestRateLimits = new Map();
 const DEFAULT_DB_STATE = { alunos: [], config: {}, users: [], accessLogs: [] };
 let dbCache = JSON.parse(JSON.stringify(DEFAULT_DB_STATE));
 let dbPersistChain = Promise.resolve();
 let sessionPersistChain = Promise.resolve();
 let hasWarnedInsecureTransport = false;
+let hasWarnedMissingCorsOrigin = false;
 const ALLOWED_STATIC_EXTENSIONS = new Set(['.html', '.css', '.js', '.png', '.jpg', '.jpeg', '.svg', '.ico']);
 // tracking de tentativas de login para proteção simples contra brute-force
 const failedLogins = new Map(); // chave: 'ip:...' ou 'user:...'
+const DEV_TRUSTED_ORIGINS = new Set([
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:3001',
+  'http://127.0.0.1:3001',
+]);
 
 const PROTECTED_PAGES = new Set(['/alunos.html', '/cadastro.html', '/financeiro.html', '/uniformes.html', '/users.html']);
 const ADMIN_ONLY_PAGES = new Set(['/users.html']);
+
+function getTrustedOriginsFromEnv() {
+  const rawOrigins = String(process.env.CORS_ALLOWED_ORIGINS || '').trim();
+  const singleOrigin = String(CORS_ALLOWED_ORIGIN || '').trim();
+  const values = [];
+
+  if (singleOrigin) values.push(singleOrigin);
+  if (rawOrigins) {
+    rawOrigins
+      .split(',')
+      .map(item => item.trim())
+      .filter(Boolean)
+      .forEach(item => values.push(item));
+  }
+
+  return new Set(values);
+}
+
+const TRUSTED_ORIGINS = getTrustedOriginsFromEnv();
 
 function getDefaultInventory() {
   return {
@@ -1178,15 +1211,38 @@ function handleRequestBodyError(res, error) {
   return false;
 }
 
+function getRequestHost(req) {
+  return String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0].trim().toLowerCase();
+}
+
+function getRequestProtocol(req) {
+  if (req.socket && req.socket.encrypted) return 'https';
+  const forwardedProto = String(req.headers['x-forwarded-proto'] || '').split(',')[0].trim().toLowerCase();
+  return forwardedProto === 'https' ? 'https' : 'http';
+}
+
+function isSameOrigin(req, origin) {
+  const host = getRequestHost(req);
+  if (!host) return false;
+  return String(origin || '').toLowerCase() === `${getRequestProtocol(req)}://${host}`;
+}
+
+function isTrustedOrigin(req, origin) {
+  const normalizedOrigin = String(origin || '').trim().toLowerCase();
+  if (!normalizedOrigin) return false;
+  if (isSameOrigin(req, normalizedOrigin)) return true;
+  if (TRUSTED_ORIGINS.has(normalizedOrigin)) return true;
+  if (!IS_PRODUCTION && DEV_TRUSTED_ORIGINS.has(normalizedOrigin)) return true;
+  return false;
+}
+
 function shouldSendCorsHeaders(req) {
-  if (!CORS_ALLOWED_ORIGIN) return false;
-  return String(req.headers.origin || '') === CORS_ALLOWED_ORIGIN;
+  const origin = String(req.headers.origin || '').trim();
+  return isTrustedOrigin(req, origin);
 }
 
 function isSecureRequest(req) {
-  if (req.socket && req.socket.encrypted) return true;
-  const forwardedProto = String(req.headers['x-forwarded-proto'] || '').split(',')[0].trim().toLowerCase();
-  return forwardedProto === 'https';
+  return getRequestProtocol(req) === 'https';
 }
 
 function getIdFromPath(pathname) {
@@ -1206,6 +1262,86 @@ function parseCookies(req) {
   }
 
   return cookies;
+}
+
+function getRequestIp(req) {
+  const forwarded = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+  if (forwarded) return forwarded;
+  return String(req.socket.remoteAddress || 'unknown').trim() || 'unknown';
+}
+
+function setSecurityHeaders(req, res) {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+  res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self' data: https://api.dicebear.com; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'");
+  if (IS_PRODUCTION && isSecureRequest(req)) {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
+}
+
+function isApiPath(pathname) {
+  return String(pathname || '').startsWith('/api/');
+}
+
+function isStateChangingMethod(method) {
+  return method === 'POST' || method === 'PUT' || method === 'PATCH' || method === 'DELETE';
+}
+
+function isStateChangingApiRequest(req, pathname) {
+  return isApiPath(pathname) && isStateChangingMethod(String(req.method || '').toUpperCase());
+}
+
+function extractRequestOrigin(req) {
+  const origin = String(req.headers.origin || '').trim();
+  if (origin) return origin;
+
+  const referer = String(req.headers.referer || '').trim();
+  if (!referer) return '';
+  try {
+    const parsed = new URL(referer);
+    return parsed.origin;
+  } catch (_error) {
+    return '';
+  }
+}
+
+function shouldBlockByOriginPolicy(req, pathname) {
+  if (!ENFORCE_ORIGIN_ON_STATE_CHANGES) return false;
+  if (!isStateChangingApiRequest(req, pathname)) return false;
+
+  const origin = extractRequestOrigin(req);
+  if (!origin) return true;
+  return !isTrustedOrigin(req, origin);
+}
+
+function applyRateLimit(req, res, pathname) {
+  if (!isApiPath(pathname)) return false;
+  if (pathname === '/api/health') return false;
+
+  const now = Date.now();
+  const ip = getRequestIp(req);
+  const isAuthPath = String(pathname || '').startsWith('/api/auth/');
+  const routeGroup = isAuthPath ? 'auth' : 'api';
+  const limit = isAuthPath ? MAX_AUTH_REQUESTS_PER_WINDOW : MAX_API_REQUESTS_PER_WINDOW;
+  const key = `${routeGroup}:${ip}`;
+  const entry = requestRateLimits.get(key);
+
+  if (!entry || now - entry.windowStart >= RATE_LIMIT_WINDOW_MS) {
+    requestRateLimits.set(key, { count: 1, windowStart: now });
+    return false;
+  }
+
+  entry.count += 1;
+  if (entry.count <= limit) return false;
+
+  const retryAfterSeconds = Math.max(1, Math.ceil((RATE_LIMIT_WINDOW_MS - (now - entry.windowStart)) / 1000));
+  res.setHeader('Retry-After', String(retryAfterSeconds));
+  sendJson(res, { error: 'Muitas requisições. Tente novamente em instantes.' }, 429);
+  return true;
 }
 
 function setCookie(res, name, value, options = {}) {
@@ -1380,15 +1516,16 @@ function isBlockedLogin(key) {
   const entry = failedLogins.get(key);
   if (!entry) return false;
   if (entry.blockedUntil && entry.blockedUntil > Date.now()) return true;
+  if (entry.blockedUntil && entry.blockedUntil <= Date.now()) {
+    failedLogins.delete(key);
+  }
   return false;
 }
 
 function recordFailedLogin(key) {
   const now = Date.now();
   const entry = failedLogins.get(key) || { count: 0, firstAt: now, blockedUntil: 0 };
-  // janela de 15 minutos
-  const windowMs = 15 * 60 * 1000;
-  if (now - entry.firstAt > windowMs) {
+  if (now - entry.firstAt > FAILED_LOGIN_BLOCK_WINDOW_MS) {
     entry.count = 1;
     entry.firstAt = now;
     entry.blockedUntil = 0;
@@ -1396,8 +1533,8 @@ function recordFailedLogin(key) {
     entry.count = (entry.count || 0) + 1;
   }
 
-  if (entry.count >= 5) {
-    entry.blockedUntil = now + windowMs; // bloquear por 15 minutos
+  if (entry.count >= MAX_FAILED_LOGINS) {
+    entry.blockedUntil = now + FAILED_LOGIN_BLOCK_WINDOW_MS;
   }
   failedLogins.set(key, entry);
 }
@@ -1434,11 +1571,27 @@ const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
   const pathname = parsedUrl.pathname;
 
+  setSecurityHeaders(req, res);
+
+  if (isApiPath(pathname)) {
+    res.setHeader('Cache-Control', 'no-store');
+  }
+
+  if (shouldSendCorsHeaders(req)) {
+    res.setHeader('Access-Control-Allow-Origin', String(req.headers.origin || '').trim());
+    res.setHeader('Vary', 'Origin');
+  }
+
   maybeGenerateScheduledReports();
 
   if (IS_PRODUCTION && !isSecureRequest(req) && !hasWarnedInsecureTransport) {
     hasWarnedInsecureTransport = true;
     console.warn('AVISO DE SEGURANCA: NODE_ENV=production sem HTTPS detectado. Configure proxy HTTPS (Nginx/Caddy/Render/Railway) com x-forwarded-proto=https.');
+  }
+
+  if (IS_PRODUCTION && TRUSTED_ORIGINS.size === 0 && !hasWarnedMissingCorsOrigin) {
+    hasWarnedMissingCorsOrigin = true;
+    console.warn('AVISO DE SEGURANCA: CORS_ALLOWED_ORIGIN/CORS_ALLOWED_ORIGINS não definidos. Operações de escrita exigirão Origin same-origin estrito.');
   }
 
   if (req.method === 'OPTIONS') {
@@ -1452,6 +1605,14 @@ const server = http.createServer(async (req, res) => {
     }
     res.writeHead(204, corsHeaders);
     return res.end();
+  }
+
+  if (shouldBlockByOriginPolicy(req, pathname)) {
+    return sendJson(res, { error: 'Origem não permitida para esta operação.' }, 403);
+  }
+
+  if (applyRateLimit(req, res, pathname)) {
+    return;
   }
 
   if (pathname === '/api/health' && req.method === 'GET') {
@@ -1526,7 +1687,7 @@ const server = http.createServer(async (req, res) => {
       const body = await parseRequestBody(req, res);
       const username = normalizeUsername(body.username);
       const password = String(body.password || '');
-      const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown').split(',')[0].trim();
+      const ip = getRequestIp(req);
       const userKey = `user:${username}`;
       const ipKey = `ip:${ip}`;
 

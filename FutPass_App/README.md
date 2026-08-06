@@ -36,3 +36,11 @@ npm run migrate:json-to-mongo
 - Instalação em outro PC: `INSTALL-PC.md`
 - Deploy no Render gratuito: `DEPLOY-RENDER.md`
 - Segurança e variáveis gerais: `DEPLOY.md`
+
+## Checklist de seguranca de longo prazo
+
+- `NODE_ENV=production`
+- `USE_SECURE_COOKIES=true`
+- `ENFORCE_ORIGIN_ON_STATE_CHANGES=true`
+- `CORS_ALLOWED_ORIGIN` preenchido com o dominio oficial
+- Atlas sem `0.0.0.0/0` permanente (usar faixa restrita quando possivel)
