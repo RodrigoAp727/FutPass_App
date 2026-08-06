@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arena 01 - Uniformes e Produtos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; }
+        body { background: radial-gradient(circle at 10% 10%, rgba(53, 163, 255, 0.14), transparent 38%), radial-gradient(circle at 90% 90%, rgba(255, 179, 35, 0.16), transparent 42%), linear-gradient(135deg, #04070d, #0c1322 55%, #111a2c); color: #f8fafc; display: flex; min-height: 100vh; }
+        .sidebar { width: 280px; background: linear-gradient(180deg, rgba(8, 12, 20, 0.96), rgba(13, 19, 31, 0.9)); padding: 20px; border-right: 1px solid rgba(147, 168, 197, 0.15); display: flex; flex-direction: column; }
+        .brand-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; padding: 10px; border-radius: 12px; background: rgba(24, 38, 61, 0.5); border: 1px solid rgba(255, 179, 35, 0.18); }
+        .brand-logo { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 179, 35, 0.65); }
+        .brand-text strong { display: block; font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; font-size: 1.6rem; line-height: 1; }
+        .brand-text span { color: #94a3b8; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.8px; }
+        .menu-item { padding: 12px 15px; background: #334155; border-radius: 8px; margin-bottom: 10px; cursor: pointer; color: #cbd5e1; font-weight: bold; transition: 0.2s; text-decoration: none; display: block; }
+        .menu-item.active { background: #3b82f6; color: white; }
+        .menu-item:hover:not(.active) { background: #475569; }
+        .main-content { flex: 1; padding: 30px 40px 40px; overflow-y: auto; }
+        .header-dash { margin-bottom: 24px; padding-bottom: 15px; border-bottom: 1px solid #334155; }
+        .header-dash h1 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; font-size: 2.2rem; display: flex; align-items: center; gap: 10px; }
+        .header-dash p { color: #94a3b8; margin-top: 5px; }
+        .grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 20px; }
+        .card { background: #1e293b; border-radius: 14px; padding: 22px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .card h2 { font-size: 1.15rem; color: #f8fafc; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+        .card p.sub { color: #94a3b8; margin-bottom: 16px; font-size: 0.9rem; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .field.full { grid-column: 1 / -1; }
+        .field label { display: block; margin-bottom: 8px; color: #cbd5e1; font-size: 0.9rem; font-weight: 600; }
+        .field select, .field input { width: 100%; padding: 12px 14px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #f8fafc; font-size: 0.96rem; }
+        .btn-primary, .btn-secondary { border: none; border-radius: 10px; padding: 12px 16px; font-weight: 700; cursor: pointer; }
+        .btn-primary { background: #10b981; color: #fff; }
+        .btn-secondary { background: rgba(59, 130, 246, 0.18); color: #bfdbfe; border: 1px solid #3b82f6; }
+        .feedback { min-height: 24px; margin-bottom: 14px; font-size: 0.9rem; }
+        .feedback.error { color: #fca5a5; }
+        .feedback.success { color: #86efac; }
+        .feedback.info { color: #93c5fd; }
+        .stock-table { width: 100%; border-collapse: collapse; }
+        .stock-table th, .stock-table td { padding: 12px 10px; border-bottom: 1px solid #334155; text-align: left; }
+        .stock-table th { color: #cbd5e1; font-size: 0.82rem; text-transform: uppercase; }
+        .stock-input { width: 72px; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #f8fafc; }
+        .stock-input.low-stock { border-color: #ef4444; background: rgba(127, 29, 29, 0.22); color: #fecaca; font-weight: 700; }
+        .stock-input.out-stock { border-color: #dc2626; background: rgba(153, 27, 27, 0.45); color: #ffffff; font-weight: 700; }
+        .price-input { width: 120px; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #f8fafc; }
+        .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .list-card { margin-top: 20px; }
+        .sales-list { display: grid; gap: 10px; }
+        .sale-item { background: #0f172a; border: 1px solid #334155; border-left: 4px solid #38bdf8; border-radius: 10px; padding: 12px; }
+        .movement-item { background: #0f172a; border: 1px solid #334155; border-left: 4px solid #a78bfa; border-radius: 10px; padding: 12px; }
+        .sale-item strong, .movement-item strong { color: #f8fafc; }
+        .sale-item span, .movement-item span { color: #94a3b8; font-size: 0.9rem; }
+        .sale-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        .movement-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .movement-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; }
+        .movement-badge.positive { background: rgba(16, 185, 129, 0.18); color: #86efac; }
+        .movement-badge.negative { background: rgba(239, 68, 68, 0.18); color: #fca5a5; }
+        .movement-badge.neutral { background: rgba(148, 163, 184, 0.18); color: #cbd5e1; }
+        .sale-delete { border: 1px solid #ef4444; background: rgba(239, 68, 68, 0.14); color: #fca5a5; border-radius: 8px; padding: 8px 10px; cursor: pointer; font-weight: 700; }
+        .sale-delete:hover { background: rgba(239, 68, 68, 0.24); }
+        .empty-state { color: #94a3b8; padding: 10px 0; }
+        @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
+        @media (max-width: 900px) { body { flex-direction: column; } .sidebar { width: 100%; } }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="brand-wrap">
+            <img src="logo.png" alt="Logo Arena 01" class="brand-logo">
+            <div class="brand-text">
+                <strong>Arena 01</strong>
+                <span>Gestao de Atletas</span>
+            </div>
+        </div>
+        <a href="cadastro.html" class="menu-item"><i class="fas fa-user-plus"></i> Novo Cadastro</a>
+        <a href="alunos.html" class="menu-item"><i class="fas fa-users"></i> Alunos Cadastrados</a>
+        <a href="uniformes.html" class="menu-item active"><i class="fas fa-shirt"></i> Uniformes e Produtos</a>
+        <a href="financeiro.html" class="menu-item"><i class="fas fa-chart-pie"></i> Financeiro</a>
+    </aside>
+
+    <main class="main-content">
+        <header class="header-dash">
+            <h1><i class="fas fa-shirt"></i> Uniformes, Produtos e Estoque</h1>
+            <p>Lance as vendas avulsas em separado e controle o estoque por item e tamanho.</p>
+        </header>
+
+        <section class="grid">
+            <div class="card">
+                <h2><i class="fas fa-cash-register"></i> Nova venda avulsa</h2>
+                <p class="sub">Mensalidade continua no cadastro do aluno. Esta tela registra apenas uniforme e produtos.</p>
+                <div id="sales-feedback" class="feedback"></div>
+                <form id="sales-form">
+                    <div class="form-grid">
+                        <div class="field full">
+                            <label for="sale-aluno">Aluno</label>
+                            <select id="sale-aluno" required></select>
+                        </div>
+                        <div class="field">
+                            <label for="sale-item">Item</label>
+                            <select id="sale-item" required></select>
+                        </div>
+                        <div class="field">
+                            <label for="sale-size">Tamanho</label>
+                            <select id="sale-size" required>
+                                <option value="P">P</option>
+                                <option value="M">M</option>
+                                <option value="G">G</option>
+                                <option value="GG">GG</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="sale-value">Valor</label>
+                            <input type="text" id="sale-value" inputmode="decimal" placeholder="R$ 0,00" required>
+                        </div>
+                        <div class="field">
+                            <label for="sale-payment">Forma de pagamento</label>
+                            <select id="sale-payment" required>
+                                <option value="PIX">PIX</option>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                <option value="Cartão de Débito">Cartão de Débito</option>
+                                <option value="Não informado">Não informado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary" style="margin-top:16px;"><i class="fas fa-plus"></i> Registrar venda</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-boxes-stacked"></i> Estoque por tamanho</h2>
+                <p class="sub">Você pode ajustar livremente as quantidades atuais e o valor padrão de cada item. Cada alteração fica registrada no histórico do estoque.</p>
+                <div id="stock-feedback" class="feedback"></div>
+                <div style="overflow:auto;">
+                    <table class="stock-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Valor padrão</th>
+                                <th>P</th>
+                                <th>M</th>
+                                <th>G</th>
+                                <th>GG</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stock-body"></tbody>
+                    </table>
+                </div>
+                <div class="form-grid" style="margin-top:16px;">
+                    <div class="field">
+                        <label for="stock-movement-type">Tipo do ajuste</label>
+                        <select id="stock-movement-type">
+                            <option value="entrada-manual">Entrada manual</option>
+                            <option value="ajuste-manual" selected>Ajuste manual</option>
+                            <option value="correcao-manual">Correção manual</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="stock-movement-note">Observação do ajuste</label>
+                        <input type="text" id="stock-movement-note" maxlength="160" placeholder="Ex.: compra do mês, conferência física, correção de saldo">
+                    </div>
+                </div>
+                <button type="button" id="save-stock" class="btn-secondary" style="margin-top:16px;"><i class="fas fa-floppy-disk"></i> Salvar estoque</button>
+            </div>
+        </section>
+
+        <section class="card list-card">
+            <h2><i class="fas fa-filter"></i> Filtros das vendas</h2>
+            <div class="filter-grid">
+                <div class="field">
+                    <label for="sales-filter-aluno">Aluno</label>
+                    <select id="sales-filter-aluno">
+                        <option value="">Todos os alunos</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="sales-filter-payment">Forma de pagamento</label>
+                    <select id="sales-filter-payment">
+                        <option value="">Todas as formas</option>
+                        <option value="PIX">PIX</option>
+                        <option value="Dinheiro">Dinheiro</option>
+                        <option value="Cartão de Crédito">Cartão de Crédito</option>
+                        <option value="Cartão de Débito">Cartão de Débito</option>
+                        <option value="Não informado">Não informado</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <section class="card list-card">
+            <h2><i class="fas fa-clock-rotate-left"></i> Últimas vendas lançadas</h2>
+            <div id="sales-list" class="sales-list"></div>
+        </section>
+
+        <section class="card list-card">
+            <h2><i class="fas fa-timeline"></i> Histórico recente do estoque</h2>
+            <p class="sub">Entradas, saídas por venda, estornos e ajustes manuais ficam registrados aqui.</p>
+            <div id="stock-movements-list" class="sales-list"></div>
+        </section>
+    </main>
+
+    <script src="auth.js"></script>
+    <script>
+        const ITEM_DEFINITIONS = {
+            uniformeCompleto: { nome: 'Uniforme completo', categoria: 'uniforme', valorPadrao: 130 },
+            camiseta: { nome: 'Camiseta', categoria: 'produto-avulso', valorPadrao: 0 },
+            calcao: { nome: 'Calção', categoria: 'produto-avulso', valorPadrao: 0 },
+            meiao: { nome: 'Meião', categoria: 'produto-avulso', valorPadrao: 0 },
+            caneleira: { nome: 'Caneleira', categoria: 'produto-avulso', valorPadrao: 0 },
+        };
+
+        const MOVEMENT_TYPE_LABELS = {
+            venda: 'Venda',
+            'estorno-venda': 'Estorno de venda',
+            'entrada-manual': 'Entrada manual',
+            'ajuste-manual': 'Ajuste manual',
+            'correcao-manual': 'Correção manual',
+            'preco-atualizado': 'Preço atualizado'
+        };
+
+        let alunosCache = [];
+        let estoqueCache = {};
+        let movimentacoesEstoqueCache = [];
+
+        function getDefaultInventory() {
+            return {
+                uniformeCompleto: { nome: 'Uniforme completo', valor: 130, tamanhos: { P: 23, M: 33, G: 28, GG: 20 } },
+                camiseta: { nome: 'Camiseta', valor: 0, tamanhos: { P: 23, M: 33, G: 28, GG: 20 } },
+                calcao: { nome: 'Calção', valor: 0, tamanhos: { P: 0, M: 0, G: 0, GG: 0 } },
+                meiao: { nome: 'Meião', valor: 0, tamanhos: { P: 0, M: 0, G: 0, GG: 0 } },
+                caneleira: { nome: 'Caneleira', valor: 0, tamanhos: { P: 0, M: 0, G: 0, GG: 0 } },
+            };
+        }
+
+        function mergeInventory(source) {
+            const defaults = getDefaultInventory();
+            const current = source && typeof source === 'object' ? source : {};
+            const merged = {};
+
+            Object.keys(defaults).forEach(key => {
+                const item = current[key] || {};
+                const sizes = item.tamanhos || {};
+                merged[key] = {
+                    nome: item.nome || defaults[key].nome,
+                    valor: Math.max(0, Number(item.valor ?? defaults[key].valor) || 0),
+                    tamanhos: {
+                        P: Number(sizes.P ?? defaults[key].tamanhos.P) || 0,
+                        M: Number(sizes.M ?? defaults[key].tamanhos.M) || 0,
+                        G: Number(sizes.G ?? defaults[key].tamanhos.G) || 0,
+                        GG: Number(sizes.GG ?? defaults[key].tamanhos.GG) || 0,
+                    }
+                };
+            });
+
+            return merged;
+        }
+
+        function getInventoryLocal() {
+            try {
+                return mergeInventory(JSON.parse(localStorage.getItem('futpass_estoque') || '{}'));
+            } catch {
+                return mergeInventory({});
+            }
+        }
+
+        function saveInventoryLocal(inventory) {
+            localStorage.setItem('futpass_estoque', JSON.stringify(inventory));
+        }
+
+        function getInventoryMovementsLocal() {
+            try {
+                return JSON.parse(localStorage.getItem('futpass_estoque_movimentacoes') || '[]');
+            } catch {
+                return [];
+            }
+        }
+
+        function saveInventoryMovementsLocal(movements) {
+            localStorage.setItem('futpass_estoque_movimentacoes', JSON.stringify((movements || []).slice(0, 200)));
+        }
+
+        function getAlunosLocal() {
+            try {
+                return JSON.parse(localStorage.getItem('futpass_alunos') || localStorage.getItem('alunosCadastrados') || '[]');
+            } catch {
+                return [];
+            }
+        }
+
+        function saveAlunosLocal(alunos) {
+            localStorage.setItem('futpass_alunos', JSON.stringify(alunos));
+        }
+
+        function formatCurrencyValue(value) {
+            const amount = Number(value || 0);
+            return amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function formatDateTimeValue(value) {
+            const date = new Date(value || Date.now());
+            return Number.isNaN(date.getTime()) ? 'Não informado' : date.toLocaleString('pt-BR');
+        }
+
+        function getMovementTypeLabel(type) {
+            return MOVEMENT_TYPE_LABELS[type] || 'Movimentação';
+        }
+
+        function formatCurrencyInput(value) {
+            const digits = String(value || '').replace(/\D/g, '');
+            const amount = Number(digits || '0') / 100;
+            return formatCurrencyValue(amount);
+        }
+
+        function parseCurrencyInput(value) {
+            const normalized = String(value || '').replace(/\s/g, '').replace('R$', '').replace(/\./g, '').replace(',', '.');
+            const amount = Number(normalized);
+            return Number.isNaN(amount) ? 0 : amount;
+        }
+
+        function applyCurrencyMask(event) {
+            event.target.value = formatCurrencyInput(event.target.value);
+        }
+
+        function setFeedback(id, message, type) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.textContent = message || '';
+            el.className = `feedback ${type || ''}`.trim();
+        }
+
+        async function fetchAlunos() {
+            try {
+                const response = await fetch('/api/alunos');
+                if (!response.ok) throw new Error();
+                const alunos = await response.json();
+                saveAlunosLocal(alunos);
+                return alunos;
+            } catch {
+                return getAlunosLocal();
+            }
+        }
+
+        async function fetchInventory() {
+            try {
+                const response = await fetch('/api/estoque');
+                if (!response.ok) throw new Error();
+                const inventory = mergeInventory(await response.json());
+                saveInventoryLocal(inventory);
+                return inventory;
+            } catch {
+                return getInventoryLocal();
+            }
+        }
+
+        async function fetchInventoryMovements() {
+            try {
+                const response = await fetch('/api/estoque/movimentacoes');
+                if (!response.ok) throw new Error();
+                const movements = await response.json();
+                saveInventoryMovementsLocal(movements);
+                return movements;
+            } catch {
+                return getInventoryMovementsLocal();
+            }
+        }
+
+        function populateAlunoSelect() {
+            const select = document.getElementById('sale-aluno');
+            if (!select) return;
+
+            select.innerHTML = '';
+            const ativos = alunosCache.filter(aluno => aluno.statusMatricula !== 'Cancelado');
+
+            if (!ativos.length) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'Nenhum aluno disponível';
+                select.appendChild(option);
+            } else {
+                ativos.forEach(aluno => {
+                    const option = document.createElement('option');
+                    option.value = aluno.id;
+                    option.textContent = `${aluno.nome || ''} - ${aluno.respNome || 'Responsável não informado'}`;
+                    select.appendChild(option);
+                });
+            }
+
+            const params = new URLSearchParams(window.location.search);
+            const alunoId = params.get('aluno');
+            if (alunoId && ativos.some(aluno => aluno.id === alunoId)) {
+                select.value = alunoId;
+            }
+        }
+
+        function populateAlunoFilter() {
+            const select = document.getElementById('sales-filter-aluno');
+            if (!select) return;
+
+            const atual = select.value;
+            select.innerHTML = '';
+
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Todos os alunos';
+            select.appendChild(defaultOption);
+
+            alunosCache
+                .filter(aluno => aluno.statusMatricula !== 'Cancelado')
+                .forEach(aluno => {
+                    const option = document.createElement('option');
+                    option.value = aluno.id;
+                    option.textContent = aluno.nome || '';
+                    select.appendChild(option);
+                });
+
+            select.value = atual;
+        }
+
+        function populateItemSelect() {
+            const select = document.getElementById('sale-item');
+            if (!select) return;
+            select.innerHTML = '';
+            Object.entries(ITEM_DEFINITIONS).forEach(([key, item]) => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = item.nome;
+                select.appendChild(option);
+            });
+            updateSaleValue();
+        }
+
+        function updateSaleValue() {
+            const itemKey = document.getElementById('sale-item').value;
+            const valueInput = document.getElementById('sale-value');
+            const itemConfig = estoqueCache[itemKey] || {};
+            const configuredPrice = Number(itemConfig.valor ?? NaN);
+            const fallback = ITEM_DEFINITIONS[itemKey];
+            const nextValue = !Number.isNaN(configuredPrice) && configuredPrice > 0
+                ? configuredPrice
+                : (fallback && fallback.valorPadrao ? fallback.valorPadrao : '');
+            valueInput.value = nextValue === '' ? '' : formatCurrencyValue(nextValue);
+        }
+
+        function renderStockTable() {
+            const tbody = document.getElementById('stock-body');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+            Object.entries(estoqueCache).forEach(([key, item]) => {
+                const tr = document.createElement('tr');
+
+                const tdNome = document.createElement('td');
+                tdNome.textContent = item.nome;
+                tr.appendChild(tdNome);
+
+                const tdValor = document.createElement('td');
+                const inputValor = document.createElement('input');
+                inputValor.className = 'price-input';
+                inputValor.type = 'text';
+                inputValor.inputMode = 'decimal';
+                inputValor.dataset.item = key;
+                inputValor.dataset.field = 'valor';
+                inputValor.value = formatCurrencyValue(item.valor || 0);
+                tdValor.appendChild(inputValor);
+                tr.appendChild(tdValor);
+
+                ['P','M','G','GG'].forEach(size => {
+                    const tdSize = document.createElement('td');
+                    const inputSize = document.createElement('input');
+                    inputSize.className = getStockInputClass(item.tamanhos[size]);
+                    inputSize.type = 'number';
+                    inputSize.min = '0';
+                    inputSize.dataset.item = key;
+                    inputSize.dataset.size = size;
+                    inputSize.value = item.tamanhos[size];
+                    tdSize.appendChild(inputSize);
+                    tr.appendChild(tdSize);
+                });
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        function getStockInputClass(quantity) {
+            const amount = Number(quantity) || 0;
+            if (amount <= 0) return 'stock-input out-stock';
+            if (amount <= 10) return 'stock-input low-stock';
+            return 'stock-input';
+        }
+
+        function collectStockFromInputs() {
+            const next = mergeInventory(estoqueCache);
+            document.querySelectorAll('.price-input').forEach(input => {
+                const item = input.dataset.item;
+                if (!next[item]) return;
+                next[item].valor = Math.max(0, parseCurrencyInput(input.value));
+            });
+            document.querySelectorAll('.stock-input').forEach(input => {
+                const item = input.dataset.item;
+                const size = input.dataset.size;
+                if (!next[item]) return;
+                next[item].tamanhos[size] = Math.max(0, Number(input.value) || 0);
+            });
+            return next;
+        }
+
+        function hasInventoryChanges(previousInventory, nextInventory) {
+            return JSON.stringify(mergeInventory(previousInventory)) !== JSON.stringify(mergeInventory(nextInventory));
+        }
+
+        function getTodasVendas(aluno) {
+            const novas = Array.isArray(aluno.vendasAvulsas) ? aluno.vendasAvulsas : [];
+            const legadas = Array.isArray(aluno.uniformeHistorico) ? aluno.uniformeHistorico : [];
+            const historicoConvertido = legadas.map((item, index) => ({
+                data: item.data,
+                ciclo: item.ciclo,
+                valor: Number(item.valor) || 130,
+                tipo: 'Uniforme completo',
+                categoria: 'uniforme',
+                tamanho: item.tamanho || 'Não informado',
+                formaPagamento: item.formaPagamento || aluno.formaPagamento || 'Não informado',
+                itemCodigo: 'uniformeCompleto',
+                __source: 'uniformeHistorico',
+                __index: index
+            }));
+
+            return [...historicoConvertido, ...novas.map((item, index) => ({ ...item, __source: 'vendasAvulsas', __index: index }))].map(item => ({
+                ...item,
+                alunoId: item.alunoId || aluno.id,
+                alunoNome: item.alunoNome || aluno.nome || 'Aluno sem nome'
+            }));
+        }
+
+        function getFilteredSales() {
+            const alunoId = document.getElementById('sales-filter-aluno')?.value || '';
+            const payment = document.getElementById('sales-filter-payment')?.value || '';
+
+            return alunosCache
+                .flatMap(aluno => getTodasVendas(aluno))
+                .filter(venda => !alunoId || venda.alunoId === alunoId)
+                .filter(venda => !payment || (venda.formaPagamento || 'Não informado') === payment)
+                .sort((a, b) => new Date(b.data || 0) - new Date(a.data || 0));
+        }
+
+        function renderSalesList() {
+            const list = document.getElementById('sales-list');
+            if (!list) return;
+
+            const allSales = getFilteredSales().slice(0, 12);
+            list.innerHTML = '';
+
+            if (!allSales.length) {
+                const p = document.createElement('p');
+                p.className = 'empty-state';
+                p.textContent = 'Nenhuma venda avulsa registrada ainda.';
+                list.appendChild(p);
+                return;
+            }
+
+            allSales.forEach(venda => {
+                const item = document.createElement('div');
+                item.className = 'sale-item';
+
+                const actions = document.createElement('div');
+                actions.className = 'sale-actions';
+
+                const info = document.createElement('div');
+                const strong = document.createElement('strong');
+                strong.textContent = venda.alunoNome || 'Aluno sem nome';
+                const span = document.createElement('span');
+                span.textContent = `${venda.tipo || 'Produto'} • Tamanho: ${venda.tamanho || 'Não informado'} • ${Number(venda.valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} • ${venda.formaPagamento || 'Não informado'}`;
+                info.appendChild(strong);
+                info.appendChild(document.createElement('br'));
+                info.appendChild(span);
+
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'sale-delete';
+                button.addEventListener('click', () => apagarVendaAluno(venda.alunoId, venda.__source, venda.__index, venda.itemCodigo || '', venda.tamanho || ''));
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-trash';
+                button.appendChild(icon);
+
+                actions.appendChild(info);
+                actions.appendChild(button);
+                item.appendChild(actions);
+                list.appendChild(item);
+            });
+        }
+
+        function buildClientInventoryMovements(previousInventory, nextInventory, movementContext) {
+            const previous = mergeInventory(previousInventory);
+            const next = mergeInventory(nextInventory);
+            const entries = [];
+            const context = movementContext || {};
+            const timestamp = new Date().toISOString();
+
+            Object.keys(next).forEach(itemKey => {
+                const previousItem = previous[itemKey] || { nome: itemKey, valor: 0, tamanhos: {} };
+                const nextItem = next[itemKey] || { nome: itemKey, valor: 0, tamanhos: {} };
+
+                if (Number(previousItem.valor || 0) !== Number(nextItem.valor || 0)) {
+                    entries.push({
+                        id: `LOCAL-MOV-${Date.now()}-${itemKey}-valor`,
+                        data: timestamp,
+                        tipo: 'preco-atualizado',
+                        tipoLabel: getMovementTypeLabel('preco-atualizado'),
+                        itemCodigo: itemKey,
+                        itemNome: nextItem.nome || itemKey,
+                        tamanho: null,
+                        quantidadeDelta: 0,
+                        quantidadeAnterior: 0,
+                        quantidadeAtual: 0,
+                        observacao: context.observacao || '',
+                        motivo: context.motivo || '',
+                        userNome: 'Modo local'
+                    });
+                }
+
+                ['P', 'M', 'G', 'GG'].forEach(size => {
+                    const previousQuantity = Number(previousItem.tamanhos?.[size] || 0);
+                    const nextQuantity = Number(nextItem.tamanhos?.[size] || 0);
+                    const delta = nextQuantity - previousQuantity;
+                    if (!delta) return;
+
+                    entries.push({
+                        id: `LOCAL-MOV-${Date.now()}-${itemKey}-${size}-${nextQuantity}`,
+                        data: timestamp,
+                        tipo: context.tipo || 'ajuste-manual',
+                        tipoLabel: getMovementTypeLabel(context.tipo || 'ajuste-manual'),
+                        itemCodigo: itemKey,
+                        itemNome: nextItem.nome || itemKey,
+                        tamanho: size,
+                        quantidadeDelta: delta,
+                        quantidadeAnterior: previousQuantity,
+                        quantidadeAtual: nextQuantity,
+                        observacao: context.observacao || '',
+                        motivo: context.motivo || '',
+                        alunoId: context.alunoId || null,
+                        alunoNome: context.alunoNome || null,
+                        userNome: 'Modo local'
+                    });
+                });
+            });
+
+            return entries;
+        }
+
+        function renderInventoryMovementsList() {
+            const list = document.getElementById('stock-movements-list');
+            if (!list) return;
+
+            const movements = Array.isArray(movimentacoesEstoqueCache) ? movimentacoesEstoqueCache.slice(0, 20) : [];
+            list.innerHTML = '';
+
+            if (!movements.length) {
+                const p = document.createElement('p');
+                p.className = 'empty-state';
+                p.textContent = 'Nenhuma movimentação de estoque registrada ainda.';
+                list.appendChild(p);
+                return;
+            }
+
+            movements.forEach(item => {
+                const delta = Number(item.quantidadeDelta || 0);
+                const deltaLabel = `${delta > 0 ? '+' : ''}${delta}`;
+                const badgeClass = delta > 0 ? 'positive' : (delta < 0 ? 'negative' : 'neutral');
+
+                const div = document.createElement('div');
+                div.className = 'movement-item';
+
+                const strong = document.createElement('strong');
+                strong.textContent = `${item.itemNome || 'Item'}${item.tamanho ? ` • Tam. ${item.tamanho}` : ''}`;
+                div.appendChild(strong);
+                div.appendChild(document.createElement('br'));
+
+                const span = document.createElement('span');
+                span.textContent = `${item.tipoLabel || getMovementTypeLabel(item.tipo)} • ${formatDateTimeValue(item.data)}${item.userNome ? ` • ${item.userNome}` : ''}`;
+                div.appendChild(span);
+
+                const meta = document.createElement('div');
+                meta.className = 'movement-meta';
+
+                const badgeDelta = document.createElement('span');
+                badgeDelta.className = `movement-badge ${badgeClass}`;
+                badgeDelta.textContent = deltaLabel;
+                meta.appendChild(badgeDelta);
+
+                const badgeSaldo = document.createElement('span');
+                badgeSaldo.className = 'movement-badge neutral';
+                badgeSaldo.textContent = `Saldo ${Number(item.quantidadeAnterior || 0)} → ${Number(item.quantidadeAtual || 0)}`;
+                meta.appendChild(badgeSaldo);
+
+                if (item.motivo) {
+                    const badgeMotivo = document.createElement('span');
+                    badgeMotivo.className = 'movement-badge neutral';
+                    badgeMotivo.textContent = item.motivo;
+                    meta.appendChild(badgeMotivo);
+                }
+
+                div.appendChild(meta);
+
+                if (item.observacao) {
+                    const note = document.createElement('br');
+                    div.appendChild(note);
+                    const obs = document.createElement('span');
+                    obs.textContent = item.observacao;
+                    div.appendChild(obs);
+                }
+
+                list.appendChild(div);
+            });
+        }
+
+        async function persistAluno(aluno) {
+            const alunos = getAlunosLocal();
+            const index = alunos.findIndex(item => item.id === aluno.id);
+            if (index >= 0) alunos[index] = aluno;
+            else alunos.push(aluno);
+            saveAlunosLocal(alunos);
+
+            try {
+                const response = await fetch('/api/alunos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(aluno)
+                });
+                if (!response.ok) throw new Error();
+                return true;
+            } catch {
+                return false;
+            }
+        }
+
+        async function persistInventory(nextInventory, movementContext, previousInventory) {
+            saveInventoryLocal(nextInventory);
+            try {
+                const response = await fetch('/api/estoque', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        inventory: nextInventory,
+                        movimento: movementContext || null
+                    })
+                });
+                return response.ok;
+            } catch {
+                const movements = buildClientInventoryMovements(previousInventory, nextInventory, movementContext);
+                if (movements.length) {
+                    movimentacoesEstoqueCache = [...movements.reverse(), ...getInventoryMovementsLocal()].slice(0, 200);
+                    saveInventoryMovementsLocal(movimentacoesEstoqueCache);
+                }
+                return false;
+            }
+        }
+
+        async function apagarVendaAluno(alunoId, source, index, itemCodigo, tamanho) {
+            const aluno = alunosCache.find(item => item.id === alunoId);
+            if (!aluno) return;
+
+            if (!window.confirm('Apagar esta venda?')) {
+                return;
+            }
+
+            if (source === 'uniformeHistorico') {
+                aluno.uniformeHistorico = Array.isArray(aluno.uniformeHistorico) ? aluno.uniformeHistorico : [];
+                aluno.uniformeHistorico.splice(index, 1);
+            } else {
+                aluno.vendasAvulsas = Array.isArray(aluno.vendasAvulsas) ? aluno.vendasAvulsas : [];
+                aluno.vendasAvulsas.splice(index, 1);
+            }
+
+            const previousInventory = mergeInventory(estoqueCache);
+            if (itemCodigo && tamanho && estoqueCache[itemCodigo] && estoqueCache[itemCodigo].tamanhos[tamanho] !== undefined) {
+                estoqueCache[itemCodigo].tamanhos[tamanho] = Number(estoqueCache[itemCodigo].tamanhos[tamanho] || 0) + 1;
+            }
+
+            const alunoPersistido = await persistAluno(aluno);
+            const inventoryPersisted = await persistInventory(estoqueCache, {
+                tipo: 'estorno-venda',
+                origem: 'sistema',
+                motivo: 'Estorno de venda',
+                observacao: 'Venda removida na tela de uniformes.',
+                alunoId: aluno.id,
+                alunoNome: aluno.nome
+            }, previousInventory);
+            movimentacoesEstoqueCache = inventoryPersisted ? await fetchInventoryMovements() : getInventoryMovementsLocal();
+            setFeedback('sales-feedback', alunoPersistido ? 'Venda apagada com sucesso e estoque devolvido automaticamente.' : 'Venda apagada apenas neste navegador, com estoque devolvido localmente.', alunoPersistido ? 'success' : 'info');
+            renderStockTable();
+            renderSalesList();
+            renderInventoryMovementsList();
+        }
+
+        async function handleSaleSubmit(event) {
+            event.preventDefault();
+            const alunoId = document.getElementById('sale-aluno').value;
+            const itemKey = document.getElementById('sale-item').value;
+            const size = document.getElementById('sale-size').value;
+            const value = parseCurrencyInput(document.getElementById('sale-value').value);
+            const payment = document.getElementById('sale-payment').value;
+
+            const aluno = alunosCache.find(item => item.id === alunoId);
+            const inventoryItem = estoqueCache[itemKey];
+            const definition = ITEM_DEFINITIONS[itemKey];
+
+            if (!aluno || !inventoryItem || !definition) {
+                setFeedback('sales-feedback', 'Selecione um aluno e um item válido.', 'error');
+                return;
+            }
+
+            if (!value || value <= 0) {
+                setFeedback('sales-feedback', 'Informe um valor válido para a venda.', 'error');
+                return;
+            }
+
+            if ((Number(inventoryItem.tamanhos[size]) || 0) <= 0) {
+                setFeedback('sales-feedback', `Sem estoque disponível para ${inventoryItem.nome} tamanho ${size}.`, 'error');
+                return;
+            }
+
+            aluno.vendasAvulsas = Array.isArray(aluno.vendasAvulsas) ? aluno.vendasAvulsas : [];
+            const previousInventory = mergeInventory(estoqueCache);
+            aluno.vendasAvulsas.push({
+                data: new Date().toISOString(),
+                ciclo: formatMonthYear(new Date()),
+                valor: value,
+                tipo: definition.nome,
+                categoria: definition.categoria,
+                formaPagamento: payment,
+                tamanho: size,
+                itemCodigo: itemKey,
+                alunoId: aluno.id,
+                alunoNome: aluno.nome
+            });
+
+            estoqueCache[itemKey].tamanhos[size] = Math.max(0, Number(estoqueCache[itemKey].tamanhos[size]) - 1);
+            saveInventoryLocal(estoqueCache);
+            const alunoPersistido = await persistAluno(aluno);
+
+            const inventoryPersisted = await persistInventory(estoqueCache, {
+                tipo: 'venda',
+                origem: 'sistema',
+                motivo: 'Venda avulsa',
+                observacao: `Venda lançada para ${aluno.nome}.`,
+                alunoId: aluno.id,
+                alunoNome: aluno.nome
+            }, previousInventory);
+            movimentacoesEstoqueCache = inventoryPersisted ? await fetchInventoryMovements() : getInventoryMovementsLocal();
+
+            setFeedback('sales-feedback', alunoPersistido ? 'Venda registrada com sucesso e estoque atualizado automaticamente.' : 'Venda salva apenas neste navegador, com estoque atualizado localmente.', alunoPersistido ? 'success' : 'info');
+            renderStockTable();
+            renderSalesList();
+            renderInventoryMovementsList();
+            document.getElementById('sales-form').reset();
+            populateAlunoSelect();
+            populateAlunoFilter();
+            populateItemSelect();
+        }
+
+        async function saveInventory() {
+            const previousInventory = mergeInventory(estoqueCache);
+            const inventory = collectStockFromInputs();
+
+            if (!hasInventoryChanges(previousInventory, inventory)) {
+                setFeedback('stock-feedback', 'Nenhuma alteração de estoque foi detectada.', 'info');
+                return;
+            }
+
+            const movementType = document.getElementById('stock-movement-type').value;
+            const movementLabel = document.getElementById('stock-movement-type').selectedOptions[0]?.textContent || getMovementTypeLabel(movementType);
+            const note = document.getElementById('stock-movement-note').value.trim();
+
+            estoqueCache = inventory;
+            saveInventoryLocal(inventory);
+
+            const persisted = await persistInventory(inventory, {
+                tipo: movementType,
+                origem: 'manual',
+                motivo: movementLabel,
+                observacao: note
+            }, previousInventory);
+
+            movimentacoesEstoqueCache = persisted ? await fetchInventoryMovements() : getInventoryMovementsLocal();
+            setFeedback('stock-feedback', persisted ? 'Estoque salvo com sucesso e histórico atualizado.' : 'Estoque salvo apenas neste navegador, com histórico local.', persisted ? 'success' : 'info');
+            renderStockTable();
+            renderInventoryMovementsList();
+        }
+
+        function formatMonthYear(date) {
+            const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            return `${meses[date.getMonth()]}/${date.getFullYear()}`;
+        }
+
+        async function initPage() {
+            alunosCache = await fetchAlunos();
+            estoqueCache = await fetchInventory();
+            movimentacoesEstoqueCache = await fetchInventoryMovements();
+            populateAlunoSelect();
+            populateAlunoFilter();
+            populateItemSelect();
+            renderStockTable();
+            renderSalesList();
+            renderInventoryMovementsList();
+
+            document.getElementById('sale-item').addEventListener('change', updateSaleValue);
+            document.getElementById('sale-value').addEventListener('input', applyCurrencyMask);
+            document.getElementById('sales-form').addEventListener('submit', handleSaleSubmit);
+            document.getElementById('save-stock').addEventListener('click', saveInventory);
+            document.getElementById('sales-filter-aluno').addEventListener('change', renderSalesList);
+            document.getElementById('sales-filter-payment').addEventListener('change', renderSalesList);
+            document.addEventListener('input', event => {
+                if (event.target.classList.contains('price-input')) {
+                    applyCurrencyMask(event);
+                }
+            });
+        }
+
+        window.onload = async () => {
+            const user = await FutPassAuth.requireAuthPage();
+            if (!user) return;
+            await initPage();
+        };
+    </script>
+</body>
+</html>

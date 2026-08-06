@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arena 01 - Cadastro e Edição</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; }
+        body { background: radial-gradient(circle at 10% 10%, rgba(53, 163, 255, 0.14), transparent 38%), radial-gradient(circle at 90% 90%, rgba(255, 179, 35, 0.16), transparent 42%), linear-gradient(135deg, #04070d, #0c1322 55%, #111a2c); color: #f8fafc; display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: 280px; background: linear-gradient(180deg, rgba(8, 12, 20, 0.96), rgba(13, 19, 31, 0.9)); padding: 20px; border-right: 1px solid rgba(147, 168, 197, 0.15); display: flex; flex-direction: column; }
+        .brand-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; padding: 10px; border-radius: 12px; background: rgba(24, 38, 61, 0.5); border: 1px solid rgba(255, 179, 35, 0.18); }
+        .brand-logo { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 179, 35, 0.65); }
+        .brand-text strong { display: block; font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; font-size: 1.6rem; line-height: 1; }
+        .brand-text span { color: #94a3b8; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.8px; }
+        .menu-item { padding: 12px 15px; background: #334155; border-radius: 8px; margin-bottom: 10px; cursor: pointer; color: #cbd5e1; font-weight: bold; transition: 0.2s; text-decoration: none; display: block; }
+        .menu-item.active { background: #3b82f6; color: white; }
+        .menu-item:hover:not(.active) { background: #475569; }
+        .main-content { flex: 1; display: flex; flex-direction: column; padding: 30px 40px; overflow-y: auto; }
+        .header-dash { margin-bottom: 30px; padding-bottom: 15px; border-bottom: 1px solid #334155; }
+        .header-dash h1 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; font-size: 2.2rem; color: #f8fafc; display: flex; align-items: center; gap: 10px; }
+        .header-dash p { color: #94a3b8; margin-top: 5px; font-size: 0.95rem; }
+        .form-container { background: #1e293b; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-width: 900px; }
+        .form-section { margin-bottom: 30px; }
+        .form-section h3 { color: #3b82f6; margin-bottom: 15px; font-size: 1.2rem; border-bottom: 1px dashed #334155; padding-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-group.full-width { grid-column: span 2; }
+        .form-group label { display: block; margin-bottom: 8px; color: #cbd5e1; font-size: 0.9rem; font-weight: 600; }
+        .form-group input, .form-group select { width: 100%; padding: 12px 15px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white; font-size: 1rem; outline: none; transition: 0.3s; }
+        .form-group input:focus, .form-group select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .product-item { display: flex; align-items: center; gap: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px 12px; }
+        .product-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: #3b82f6; }
+        .product-item label { margin: 0; min-width: 90px; color: #cbd5e1; font-weight: 600; }
+        .product-item input[type="text"] { flex: 1; padding: 9px 10px; font-size: 0.9rem; }
+        .hint-text { color: #94a3b8; font-size: 0.82rem; margin-top: 8px; }
+        ::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+        .btn-salvar { background: #10b981; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.2s; width: 100%; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .btn-salvar:hover { background: #059669; }
+        #toast { position: fixed; bottom: 30px; right: 30px; background: #10b981; color: white; padding: 15px 25px; border-radius: 8px; font-weight: bold; display: none; align-items: center; gap: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); animation: slideUp 0.3s ease-out; z-index: 1000; }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="brand-wrap">
+            <img src="logo.png" alt="Logo Arena 01" class="brand-logo">
+            <div class="brand-text">
+                <strong>Arena 01</strong>
+                <span>Gestao de Atletas</span>
+            </div>
+        </div>
+        <a href="cadastro.html" class="menu-item active" id="menu-cad-text"><i class="fas fa-user-plus"></i> Novo Cadastro</a>
+        <a href="alunos.html" class="menu-item"><i class="fas fa-users"></i> Alunos Cadastrados</a>
+        <a href="uniformes.html" class="menu-item"><i class="fas fa-shirt"></i> Uniformes e Produtos</a>
+        <a href="financeiro.html" class="menu-item"><i class="fas fa-chart-pie"></i> Financeiro</a>
+    </aside>
+
+    <main class="main-content">
+        <header class="header-dash">
+            <h1 id="titulo-pagina"><i class="fas fa-address-card"></i> Cadastro de Novo Atleta</h1>
+            <p>Preencha os dados e a data de início de pagamento para controle financeiro.</p>
+        </header>
+
+        <div class="form-container">
+            <form id="form-cadastro" onsubmit="salvarCadastro(event)">
+                
+                <div class="form-section">
+                    <h3><i class="fas fa-user-tie"></i> 1. Dados do Responsável</h3>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>Nome Completo do Responsável</label>
+                            <input type="text" id="resp-nome" required>
+                        </div>
+                        <div class="form-group">
+                            <label>CPF</label>
+                            <input type="text" id="resp-cpf" required placeholder="Digite somente números" inputmode="numeric" autocomplete="off" maxlength="14">
+                        </div>
+                        <div class="form-group">
+                            <label>Telefone / WhatsApp</label>
+                            <input type="tel" id="resp-tel" required placeholder="Digite somente números" inputmode="tel" autocomplete="off" maxlength="15">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>E-mail</label>
+                            <input type="email" id="resp-email" required>
+                        </div>
+                        <div class="form-group full-width" style="border-left: 4px solid #3b82f6; padding-left: 15px;">
+                            <label style="color: #3b82f6;"><i class="fas fa-calendar-alt"></i> Pagamento a partir de:</label>
+                            <input type="date" id="resp-data-pagamento" required>
+                        </div>
+                        <div class="form-group full-width" style="border-left: 4px solid #f59e0b; padding-left: 15px;">
+                            <label style="color: #f59e0b;"><i class="fas fa-receipt"></i> Último pagamento registrado (opcional)</label>
+                            <input type="date" id="resp-ultimo-pagamento">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-running"></i> 2. Dados do Atleta</h3>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>Nome Completo do Aluno</label>
+                            <input type="text" id="aluno-nome" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Data de Nascimento</label>
+                            <input type="date" id="aluno-nasc" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Categoria</label>
+                            <select id="aluno-cat" required>
+                                <option value="Sub-9">Sub-9</option>
+                                <option value="Sub-11">Sub-11</option>
+                                <option value="Sub-13">Sub-13</option>
+                                <option value="Sub-15">Sub-15</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Horário da Aula</label>
+                            <input type="time" id="aluno-horario" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-clipboard-check"></i> 3. Plano Escolhido</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label style="color: #10b981;"><i class="fas fa-star"></i> Frequência do Aluno</label>
+                            <select id="aluno-plano" required>
+                                <option value="1 vez por semana">1 vez por semana</option>
+                                <option value="2 vezes por semana">2 vezes por semana</option>
+                                <option value="3 vezes por semana">3 vezes por semana</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-money-bill-wave"></i> Valor Mensal Manual</label>
+                            <input type="text" id="aluno-mensalidade" required inputmode="decimal" placeholder="R$ 0,00" autocomplete="off">
+                        </div>
+                        <div class="form-group full-width">
+                            <label><i class="fas fa-credit-card"></i> Forma de Pagamento</label>
+                            <select id="forma-pagamento" required>
+                                <option value="PIX">PIX</option>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                <option value="Cartão de Débito">Cartão de Débito</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-bag-shopping"></i> 4. Vendas Avulsas</h3>
+                    <div class="form-grid">
+                        <div class="form-group full-width" style="border-left: 4px solid #f59e0b; padding-left: 15px;">
+                            <label><i class="fas fa-circle-info"></i> Uniformes e produtos não entram mais na matrícula</label>
+                            <p class="hint-text">A matrícula salva apenas a mensalidade do aluno. Compras avulsas de uniforme, camiseta, calção, meião, caneleira ou outros itens devem ser lançadas depois na tela de alunos.</p>
+                            <p class="hint-text">Essas vendas continuam aparecendo normalmente no financeiro, mas separadas da mensalidade para não misturar as informações.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-salvar" id="btn-submit-cad"><i class="fas fa-save"></i> Efetivar Matrícula</button>
+            </form>
+        </div>
+    </main>
+
+    <div id="toast"><i class="fas fa-check-circle"></i> Dados salvos com sucesso!</div>
+
+    <script src="auth.js"></script>
+    <script>
+        let idParaEditar = null;
+
+        function getValorPlanoLegado(planoEscolhido) {
+            const plano = String(planoEscolhido || '').toLowerCase();
+            const match = plano.match(/r\$\s*([\d.,]+)/i);
+            if (match && match[1]) {
+                const normalizado = match[1].replace(/\./g, '').replace(',', '.');
+                const valor = Number(normalizado);
+                if (!Number.isNaN(valor) && valor > 0) return valor;
+            }
+            if (plano.includes('3 vezes')) return 170;
+            if (plano.includes('2 vezes')) return 150;
+            if (plano.includes('1 vez')) return 130;
+            return 130;
+        }
+
+        function parseCurrencyInput(value) {
+            const normalized = String(value || '').replace(/\s/g, '').replace('R$', '').replace(/\./g, '').replace(',', '.');
+            const amount = Number(normalized);
+            return Number.isFinite(amount) && amount >= 0 ? amount : 0;
+        }
+
+        function formatCurrencyValue(value) {
+            return (Number(value) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function applyCurrencyMask(event) {
+            const input = event.target;
+            const digits = String(input.value || '').replace(/\D/g, '');
+            const amount = Number(digits || '0') / 100;
+            input.value = formatCurrencyValue(amount);
+        }
+
+        function obterAlunosLocalStorage() {
+            const dados = localStorage.getItem('futpass_alunos') || localStorage.getItem('alunosCadastrados');
+            if (!dados) return [];
+            try {
+                return JSON.parse(dados);
+            } catch {
+                return [];
+            }
+        }
+
+        function salvarAlunosLocalStorage(alunos) {
+            localStorage.setItem('futpass_alunos', JSON.stringify(alunos));
+        }
+
+        async function fetchAlunoPorId(id) {
+            try {
+                const response = await fetch(`/api/alunos/${encodeURIComponent(id)}`);
+                if (response.ok) return response.json();
+            } catch (error) {
+                console.warn('Falha ao buscar aluno no servidor:', error);
+            }
+
+            const alunosLocal = obterAlunosLocalStorage();
+            return alunosLocal.find(a => a.id === id) || null;
+        }
+
+        async function carregarAlunoParaEdicao() {
+            const urlParams = new URLSearchParams(window.location.search);
+            idParaEditar = urlParams.get('edit');
+
+            if (!idParaEditar) return;
+
+            const titulo = document.getElementById('titulo-pagina');
+            titulo.innerHTML = '';
+            const icon = document.createElement('i'); icon.className = 'fas fa-user-edit';
+            titulo.appendChild(icon);
+            titulo.appendChild(document.createTextNode(' Atualizar Dados do Atleta'));
+
+            const btn = document.getElementById('btn-submit-cad');
+            btn.innerHTML = '';
+            const btnIcon = document.createElement('i'); btnIcon.className = 'fas fa-sync';
+            btn.appendChild(btnIcon);
+            btn.appendChild(document.createTextNode(' Salvar Alterações'));
+
+            const menuText = document.getElementById('menu-cad-text');
+            menuText.innerHTML = '';
+            const menuIcon = document.createElement('i'); menuIcon.className = 'fas fa-user-edit';
+            menuText.appendChild(menuIcon);
+            menuText.appendChild(document.createTextNode(' Editando...'));
+
+            const alunoExistente = await fetchAlunoPorId(idParaEditar);
+            if (!alunoExistente) {
+                alert('Não foi possível carregar o cadastro para edição. Verifique se o servidor está ativo ou se o aluno existe.');
+                return;
+            }
+
+            document.getElementById('resp-nome').value = alunoExistente.respNome || '';
+            document.getElementById('resp-cpf').value = alunoExistente.respCpf || '';
+            document.getElementById('resp-tel').value = alunoExistente.respTel || '';
+            document.getElementById('resp-email').value = alunoExistente.respEmail || '';
+            document.getElementById('resp-data-pagamento').value = alunoExistente.dataInicioPagamento || '';
+            document.getElementById('resp-ultimo-pagamento').value = alunoExistente.dataUltimoPagamento || '';
+            document.getElementById('aluno-nome').value = alunoExistente.nome || '';
+            document.getElementById('aluno-nasc').value = alunoExistente.dataNascimento || '';
+            document.getElementById('aluno-cat').value = alunoExistente.categoria || '';
+            document.getElementById('aluno-horario').value = alunoExistente.horarioAula || '';
+            document.getElementById('aluno-plano').value = alunoExistente.planoEscolhido || '1 vez por semana';
+            document.getElementById('aluno-mensalidade').value = formatCurrencyValue(Number(alunoExistente.mensalidadeValor) || getValorPlanoLegado(alunoExistente.planoEscolhido));
+            document.getElementById('forma-pagamento').value = alunoExistente.formaPagamento || 'PIX';
+        }
+
+        async function salvarCadastro(event) {
+            event.preventDefault();
+            const nomeDoAluno = document.getElementById('aluno-nome').value.trim();
+            const respCpf = document.getElementById('resp-cpf').value.trim();
+            const dataNascimento = document.getElementById('aluno-nasc').value;
+
+            if (!nomeDoAluno || !dataNascimento || !respCpf) {
+                alert('Por favor, preencha os campos obrigatórios antes de salvar.');
+                return;
+            }
+
+            const dadosTela = {
+                nome: nomeDoAluno,
+                avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(nomeDoAluno),
+                categoria: document.getElementById('aluno-cat').value,
+                horarioAula: document.getElementById('aluno-horario').value,
+                respNome: document.getElementById('resp-nome').value.trim(),
+                respTel: document.getElementById('resp-tel').value.trim(),
+                respCpf: respCpf,
+                respEmail: document.getElementById('resp-email').value.trim(),
+                dataNascimento: dataNascimento,
+                planoEscolhido: document.getElementById('aluno-plano').value,
+                mensalidadeValor: parseCurrencyInput(document.getElementById('aluno-mensalidade').value),
+                formaPagamento: document.getElementById('forma-pagamento').value,
+                dataUltimoPagamento: document.getElementById('resp-ultimo-pagamento').value,
+                dataInicioPagamento: document.getElementById('resp-data-pagamento').value
+            };
+
+            dadosTela.statusFinanceiro = getStatusFinanceiroAutomatico(dadosTela.dataInicioPagamento, dadosTela.dataUltimoPagamento, 'Ativo');
+
+            if (idParaEditar) {
+                dadosTela.id = idParaEditar;
+                const alunosLocal = obterAlunosLocalStorage();
+                const alunoExistente = alunosLocal.find(a => a.id === idParaEditar);
+                if (alunoExistente) {
+                    dadosTela.statusMatricula = alunoExistente.statusMatricula || 'Ativo';
+                    dadosTela.statusFinanceiro = alunoExistente.statusMatricula === 'Cancelado'
+                        ? (alunoExistente.statusFinanceiro || 'Pago')
+                        : getStatusFinanceiroAutomatico(dadosTela.dataInicioPagamento, dadosTela.dataUltimoPagamento, dadosTela.statusMatricula);
+                    dadosTela.dataCriacao = alunoExistente.dataCriacao || new Date().toISOString();
+                    dadosTela.avatar = alunoExistente.avatar || dadosTela.avatar;
+                    dadosTela.uniformeHistorico = Array.isArray(alunoExistente.uniformeHistorico) ? alunoExistente.uniformeHistorico : [];
+                    dadosTela.vendasAvulsas = Array.isArray(alunoExistente.vendasAvulsas) ? alunoExistente.vendasAvulsas : [];
+                }
+            }
+
+            let alunoSalvo = null;
+            let salvoSomenteLocal = false;
+            try {
+                const response = await fetch('/api/alunos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dadosTela)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json().catch(() => ({ error: 'Erro ao salvar o aluno.' }));
+                    throw new Error(error.error || 'Não foi possível salvar o cadastro.');
+                }
+                alunoSalvo = await response.json();
+            } catch (error) {
+                console.warn('Falha ao salvar no servidor, gravando localmente:', error);
+                const alunosLocal = obterAlunosLocalStorage();
+                const index = alunosLocal.findIndex(a => a.id === dadosTela.id);
+                if (index >= 0) {
+                    alunosLocal[index] = Object.assign(alunosLocal[index], dadosTela);
+                } else {
+                    dadosTela.id = dadosTela.id || 'ALUNO-' + Math.floor(Math.random() * 1000000);
+                    dadosTela.statusMatricula = dadosTela.statusMatricula || 'Ativo';
+                    dadosTela.statusFinanceiro = dadosTela.statusFinanceiro || 'Pago';
+                    alunosLocal.push(dadosTela);
+                }
+                salvarAlunosLocalStorage(alunosLocal);
+                alunoSalvo = dadosTela;
+                salvoSomenteLocal = true;
+            }
+
+            const toast = document.getElementById('toast');
+            toast.style.display = 'flex';
+            toast.innerHTML = salvoSomenteLocal
+                ? '<i class="fas fa-triangle-exclamation"></i> Salvo apenas neste navegador. Abra Alunos para restaurar no sistema.'
+                : '<i class="fas fa-check-circle"></i> Cadastro salvo com sucesso!';
+            toast.style.background = salvoSomenteLocal ? '#f59e0b' : '#10b981';
+
+            setTimeout(() => {
+                toast.style.display = 'none';
+                if (idParaEditar) {
+                    window.location.href = 'alunos.html';
+                } else {
+                    document.getElementById('form-cadastro').reset();
+                }
+            }, 1500);
+        }
+
+        function somenteDigitos(valor) {
+            return (valor || '').replace(/\D/g, '');
+        }
+
+        function formatarCpf(valor) {
+            const digitos = somenteDigitos(valor).slice(0, 11);
+            if (digitos.length <= 3) return digitos;
+            if (digitos.length <= 6) return digitos.replace(/(\d{3})(\d+)/, '$1.$2');
+            if (digitos.length <= 9) return digitos.replace(/(\d{3})(\d{3})(\d+)/, '$1.$2.$3');
+            return digitos.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+        }
+
+        function formatarTelefone(valor) {
+            const digitos = somenteDigitos(valor).slice(0, 11);
+            if (digitos.length <= 2) return digitos;
+            if (digitos.length <= 6) return `(${digitos.slice(0, 2)}) ${digitos.slice(2)}`;
+            if (digitos.length <= 10) return `(${digitos.slice(0, 2)}) ${digitos.slice(2, 6)}-${digitos.slice(6)}`;
+            return `(${digitos.slice(0, 2)}) ${digitos.slice(2, 7)}-${digitos.slice(7)}`;
+        }
+
+        function aplicarMascaraCpf(event) {
+            const campo = event.target;
+            campo.value = formatarCpf(campo.value);
+            const pos = campo.value.length;
+            campo.setSelectionRange(pos, pos);
+        }
+
+        function aplicarMascaraTelefone(event) {
+            const campo = event.target;
+            campo.value = formatarTelefone(campo.value);
+            const pos = campo.value.length;
+            campo.setSelectionRange(pos, pos);
+        }
+
+        function getStatusFinanceiroAutomatico(dataInicioPagamento, dataUltimoPagamento, statusMatricula) {
+            if (statusMatricula && statusMatricula !== 'Ativo') return 'Pago';
+            if (!dataInicioPagamento) return 'Pago';
+
+            const inicio = new Date(dataInicioPagamento + 'T12:00:00Z');
+            if (Number.isNaN(inicio.getTime())) return 'Pago';
+
+            let ultimoPagamento = null;
+            if (dataUltimoPagamento) {
+                const tmp = new Date(dataUltimoPagamento + 'T12:00:00Z');
+                if (!Number.isNaN(tmp.getTime())) ultimoPagamento = tmp;
+            }
+
+            const hoje = new Date();
+            const diaBase = inicio.getDate();
+            let cursor = new Date(inicio.getFullYear(), inicio.getMonth(), 1);
+            const limite = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+
+            while (cursor <= limite) {
+                const ano = cursor.getFullYear();
+                const mes = cursor.getMonth();
+                const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
+                const diaVencimento = Math.min(diaBase, ultimoDiaMes);
+                const vencimento = new Date(ano, mes, diaVencimento, 23, 59, 59);
+
+                if (hoje > vencimento) {
+                    const cicloPago = ultimoPagamento && (
+                        ultimoPagamento.getFullYear() > ano ||
+                        (ultimoPagamento.getFullYear() === ano && ultimoPagamento.getMonth() >= mes)
+                    );
+                    if (!cicloPago) return 'Devedor';
+                }
+
+                cursor.setMonth(cursor.getMonth() + 1);
+            }
+
+            return 'Pago';
+        }
+
+        function iniciarMascaras() {
+            const cpfInput = document.getElementById('resp-cpf');
+            const telInput = document.getElementById('resp-tel');
+            const mensalidadeInput = document.getElementById('aluno-mensalidade');
+            if (cpfInput) {
+                cpfInput.addEventListener('input', aplicarMascaraCpf);
+                cpfInput.addEventListener('blur', aplicarMascaraCpf);
+            }
+            if (telInput) {
+                telInput.addEventListener('input', aplicarMascaraTelefone);
+                telInput.addEventListener('blur', aplicarMascaraTelefone);
+            }
+            if (mensalidadeInput) {
+                mensalidadeInput.addEventListener('input', applyCurrencyMask);
+                mensalidadeInput.addEventListener('blur', applyCurrencyMask);
+                if (!mensalidadeInput.value) {
+                    mensalidadeInput.value = formatCurrencyValue(getValorPlanoLegado(document.getElementById('aluno-plano').value));
+                }
+            }
+        }
+
+        window.onload = async () => {
+            const user = await FutPassAuth.requireAuthPage();
+            if (!user) return;
+            iniciarMascaras();
+            carregarAlunoParaEdicao();
+        };
+    </script>
+</body>
+</html>
