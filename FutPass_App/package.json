@@ -11,8 +11,8 @@
     "prestart": "npm run preflight",
     "start": "node server.js",
     "security:check": "powershell -ExecutionPolicy Bypass -File .\\scripts\\security-static-404-check.ps1",
-    "migrate:json-to-mongo": "node .\\scripts\\migrate-json-to-mongo.js",
-    "preflight": "node .\\scripts\\preflight-check.js",
+    "migrate:json-to-mongo": "node ./scripts/migrate-json-to-mongo.js",
+    "preflight": "node ./scripts/preflight-check.js",
     "setup:windows": "powershell -ExecutionPolicy Bypass -File .\\scripts\\setup-windows.ps1"
   },
   "dependencies": {
