@@ -11,7 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; }
-        body { background: radial-gradient(circle at 10% 10%, rgba(53, 163, 255, 0.14), transparent 38%), radial-gradient(circle at 90% 90%, rgba(255, 179, 35, 0.16), transparent 42%), linear-gradient(135deg, #04070d, #0c1322 55%, #111a2c); color: #f8fafc; display: flex; height: 100vh; overflow: hidden; }
+        body { background: radial-gradient(circle at 10% 10%, rgba(53, 163, 255, 0.14), transparent 38%), radial-gradient(circle at 90% 90%, rgba(255, 179, 35, 0.16), transparent 42%), linear-gradient(135deg, #04070d, #0c1322 55%, #111a2c); color: #f8fafc; display: flex; min-height: 100vh; overflow-y: auto; }
         .sidebar { width: 280px; background: linear-gradient(180deg, rgba(8, 12, 20, 0.96), rgba(13, 19, 31, 0.9)); padding: 20px; border-right: 1px solid rgba(147, 168, 197, 0.15); display: flex; flex-direction: column; }
         .brand-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; padding: 10px; border-radius: 12px; background: rgba(24, 38, 61, 0.5); border: 1px solid rgba(255, 179, 35, 0.18); }
         .brand-logo { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 179, 35, 0.65); }
@@ -71,11 +71,36 @@
         .report-group-title { color: #cbd5e1; margin-top: 16px; font-size: 0.92rem; text-transform: uppercase; letter-spacing: 0.06em; }
 
         @media (max-width: 980px) {
+            body { flex-direction: column; }
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid rgba(147, 168, 197, 0.15);
+                padding: 14px;
+                display: flex;
+                flex-wrap: wrap;
+                flex-direction: row;
+                gap: 8px;
+            }
+            .brand-wrap { width: 100%; margin-bottom: 4px; }
+            .menu-item { margin: 0; white-space: nowrap; }
+            .main-content { padding: 18px 14px 28px; }
+            .header-dash h1 { font-size: 1.9rem; }
             .top-actions { flex-direction: column; align-items: stretch; }
             .filtro-wrap { justify-content: stretch; }
             .filtro-pagamento { min-width: 100%; }
             .cards-grid { grid-template-columns: 1fr; }
             .charts-section { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 640px) {
+            .header-dash h1 { font-size: 1.6rem; }
+            .header-dash p { font-size: 0.9rem; }
+            .fin-card { padding: 16px; }
+            .fin-card-value { font-size: 1.6rem; }
+            .chart-box { padding: 16px; }
+            .canvas-container { height: 250px; }
+            .report-item { flex-direction: column; align-items: flex-start; }
+            .report-item-actions { width: 100%; }
         }
     </style>
 </head>

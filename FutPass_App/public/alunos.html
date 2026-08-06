@@ -84,11 +84,36 @@
         .btn-restaurar:hover { background: rgba(59, 130, 246, 0.28); }
 
         @media (max-width: 980px) {
+            body { flex-direction: column; }
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid rgba(147, 168, 197, 0.15);
+                padding: 14px;
+                display: flex;
+                flex-wrap: wrap;
+                flex-direction: row;
+                gap: 8px;
+            }
+            .brand-wrap { width: 100%; margin-bottom: 4px; }
+            .menu-item { margin: 0; white-space: nowrap; }
+            .main-content { padding: 18px 14px 28px; }
+            .header-dash { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .header-dash h1 { font-size: 1.9rem; }
+            .presentes-box { min-width: 100%; text-align: left; }
             .toolbar { flex-direction: column; align-items: stretch; }
             .filtro-pagamento { min-width: 100%; }
             .filtro-status { min-width: 100%; }
+            .table-container { overflow-x: auto; }
+            table { min-width: 760px; }
             .inadimplentes-header { flex-direction: column; align-items: stretch; }
             .inadimplente-item { flex-direction: column; align-items: flex-start; }
+        }
+        @media (max-width: 640px) {
+            .header-dash h1 { font-size: 1.6rem; }
+            .header-dash p { font-size: 0.9rem; }
+            th, td { padding: 12px 14px; }
+            .aluno-cell { min-width: 220px; }
         }
     </style>
 </head>

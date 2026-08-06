@@ -62,7 +62,38 @@
         .sale-delete:hover { background: rgba(239, 68, 68, 0.24); }
         .empty-state { color: #94a3b8; padding: 10px 0; }
         @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
-        @media (max-width: 900px) { body { flex-direction: column; } .sidebar { width: 100%; } }
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid rgba(147, 168, 197, 0.15);
+                padding: 14px;
+                display: flex;
+                flex-wrap: wrap;
+                flex-direction: row;
+                gap: 8px;
+            }
+            .brand-wrap { width: 100%; margin-bottom: 4px; }
+            .menu-item { margin: 0; white-space: nowrap; }
+            .main-content { padding: 18px 14px 28px; }
+            .header-dash h1 { font-size: 1.9rem; }
+            .card { padding: 16px; }
+            .form-grid,
+            .filter-grid { grid-template-columns: 1fr; }
+            .btn-primary,
+            .btn-secondary { width: 100%; }
+            .sale-actions { flex-direction: column; align-items: flex-start; }
+        }
+        @media (max-width: 640px) {
+            .header-dash h1 { font-size: 1.6rem; }
+            .header-dash p { font-size: 0.9rem; }
+            .stock-table { min-width: 620px; }
+            .stock-table th,
+            .stock-table td { padding: 10px 8px; }
+            .price-input { width: 96px; }
+            .stock-input { width: 62px; }
+        }
     </style>
 </head>
 <body>
