@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arena 01 - Alunos Cadastrados</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; }
+        img { max-width: 100%; height: auto; display: block; }
+        body { background: radial-gradient(circle at 10% 10%, rgba(53, 163, 255, 0.14), transparent 38%), radial-gradient(circle at 90% 90%, rgba(255, 179, 35, 0.16), transparent 42%), linear-gradient(135deg, #04070d, #0c1322 55%, #111a2c); color: #f8fafc; display: flex; min-height: 100vh; overflow-y: auto; }
+        .sidebar { width: 280px; background: linear-gradient(180deg, rgba(8, 12, 20, 0.96), rgba(13, 19, 31, 0.9)); padding: 20px; border-right: 1px solid rgba(147, 168, 197, 0.15); display: flex; flex-direction: column; }
+        .brand-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; padding: 10px; border-radius: 12px; background: rgba(24, 38, 61, 0.5); border: 1px solid rgba(255, 179, 35, 0.18); }
+        .brand-logo { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 179, 35, 0.65); }
+        .brand-text strong { display: block; font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; font-size: 1.6rem; line-height: 1; }
+        .brand-text span { color: #94a3b8; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.8px; }
+        .menu-item { padding: 12px 15px; background: #334155; border-radius: 8px; margin-bottom: 10px; cursor: pointer; color: #cbd5e1; font-weight: bold; transition: 0.2s; text-decoration: none; display: block; }
+        .menu-item.active { background: #3b82f6; color: white; }
+        .menu-item:hover:not(.active) { background: #475569; }
+        .main-content { flex: 1; display: flex; flex-direction: column; padding: 30px 40px 40px; overflow: visible; }
+        .header-dash { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 1px solid #334155; }
+        .header-dash h1 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; font-size: 2.2rem; color: #f8fafc; display: flex; align-items: center; gap: 10px; }
+        .header-dash p { color: #94a3b8; margin-top: 5px; font-size: 0.95rem; }
+        .presentes-box { background: #1e293b; border: 1px solid #334155; border-left: 4px solid #ef4444; border-radius: 10px; padding: 10px 14px; min-width: 210px; text-align: right; }
+        .presentes-box span { display: block; font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; }
+        .presentes-box strong { font-size: 1.5rem; color: #f87171; }
+        .toolbar { background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 25px; display: flex; gap: 15px; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .search-box { flex: 1; position: relative; }
+        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+        .search-box input { width: 100%; padding: 12px 15px 12px 40px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white; font-size: 1rem; outline: none; transition: 0.3s; }
+        .search-box input:focus { border-color: #3b82f6; }
+        .filtro-pagamento { min-width: 220px; padding: 12px 15px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white; font-size: 0.95rem; outline: none; }
+        .filtro-pagamento:focus { border-color: #3b82f6; }
+        .filtro-status { min-width: 180px; padding: 12px 15px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white; font-size: 0.95rem; outline: none; }
+        .filtro-status:focus { border-color: #3b82f6; }
+        .table-container { background: #1e293b; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        thead { background: #334155; color: #cbd5e1; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        th, td { padding: 15px 20px; border-bottom: 1px solid #334155; }
+        tbody tr { transition: 0.2s; }
+        tbody tr:hover { background: #0f172a; }
+        
+        .aluno-cell { display: flex; align-items: center; gap: 15px; }
+        .aluno-avatar { width: 45px; height: 45px; border-radius: 50%; background: #3b82f6; object-fit: cover; }
+        .aluno-nome { font-weight: bold; color: #f8fafc; display: block; }
+        .resp-nome { font-weight: 600; color: #cbd5e1; display: block; }
+        .resp-tel { font-size: 0.8rem; color: #94a3b8; }
+        
+        .btn-pgto { padding: 8px 15px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; transition: 0.2s; width: 120px; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.85rem; }
+        .btn-pgto.pago { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
+        .btn-pgto.pago:hover { background: #10b981; color: white; }
+        .btn-pgto.devedor { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+        .btn-pgto.devedor:hover { background: #ef4444; color: white; }
+        
+        .acoes-container { display: flex; gap: 8px; }
+        .acoes-btn { background: #334155; border: none; color: #cbd5e1; cursor: pointer; font-size: 1rem; padding: 8px 12px; border-radius: 6px; transition: 0.2s; }
+        .acoes-btn:hover { background: #475569; color: white; }
+        .acoes-btn.editar:hover { background: #3b82f6; color: white; }
+        .acoes-btn.vendas:hover { background: #10b981; color: white; }
+        .acoes-btn.cancelar:hover { background: #f59e0b; color: white; }
+        .acoes-btn.delete:hover { background: #ef4444; color: white; }
+        
+        tr.inativo { opacity: 0.5; filter: grayscale(1); }
+        .badge-inativo { background: #475569; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; }
+        .alerta-atraso { display: inline-block; margin-top: 8px; color: #fca5a5; font-size: 0.8rem; font-weight: 600; }
+        .btn-cobranca { margin-top: 8px; padding: 6px 10px; border: 1px solid #22c55e; background: rgba(34, 197, 94, 0.15); color: #86efac; border-radius: 6px; font-size: 0.75rem; cursor: pointer; }
+        .btn-cobranca:hover { background: rgba(34, 197, 94, 0.25); }
+        .inadimplentes-box { margin-top: 25px; background: #1e293b; border-radius: 12px; border: 1px solid #334155; padding: 20px; }
+        .inadimplentes-box h3 { color: #fca5a5; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .inadimplentes-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .inadimplentes-lista { display: grid; gap: 10px; }
+        .inadimplente-item { background: #0f172a; border: 1px solid #334155; border-left: 4px solid #ef4444; border-radius: 10px; padding: 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        .inadimplente-item p { margin: 0; color: #cbd5e1; font-size: 0.9rem; }
+        .inadimplente-vazio { color: #94a3b8; font-size: 0.9rem; }
+        .btn-cobranca-lote { padding: 8px 12px; border: 1px solid #22c55e; background: rgba(34, 197, 94, 0.15); color: #86efac; border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
+        .btn-cobranca-lote:hover { background: rgba(34, 197, 94, 0.25); }
+        .btn-cobranca-lote:disabled { opacity: 0.5; cursor: not-allowed; }
+        .empty-state-box { text-align: center; padding: 26px; color: #94a3b8; }
+        .empty-state-box strong { display: block; color: #f8fafc; margin-bottom: 8px; }
+        .btn-restaurar { margin-top: 14px; padding: 10px 14px; border: 1px solid #3b82f6; background: rgba(59, 130, 246, 0.18); color: #bfdbfe; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .btn-restaurar:hover { background: rgba(59, 130, 246, 0.28); }
+
+        @media (max-width: 980px) {
+            body { flex-direction: column; }
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid rgba(147, 168, 197, 0.15);
+                padding: 14px;
+                display: flex;
+                flex-wrap: wrap;
+                flex-direction: row;
+                gap: 8px;
+            }
+            .brand-wrap { width: 100%; margin-bottom: 4px; }
+            .menu-item { margin: 0; white-space: nowrap; }
+            .main-content { padding: 18px 14px 28px; }
+            .header-dash { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .header-dash h1 { font-size: 1.9rem; }
+            .presentes-box { min-width: 100%; text-align: left; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .filtro-pagamento { min-width: 100%; }
+            .filtro-status { min-width: 100%; }
+            .table-container { overflow-x: auto; }
+            table { min-width: 760px; }
+            .inadimplentes-header { flex-direction: column; align-items: stretch; }
+            .inadimplente-item { flex-direction: column; align-items: flex-start; }
+        }
+        @media (max-width: 640px) {
+            .header-dash h1 { font-size: 1.6rem; }
+            .header-dash p { font-size: 0.9rem; }
+            th, td { padding: 12px 14px; }
+            .aluno-cell { min-width: 220px; }
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="brand-wrap">
+            <img src="logo.png" alt="Logo Arena 01" class="brand-logo">
+            <div class="brand-text">
+                <strong>Arena 01</strong>
+                <span>Gestao de Atletas</span>
+            </div>
+        </div>
+        <a href="cadastro.html" class="menu-item"><i class="fas fa-user-plus"></i> Novo Cadastro</a>
+        <a href="alunos.html" class="menu-item active"><i class="fas fa-users"></i> Alunos Cadastrados</a>
+        <a href="uniformes.html" class="menu-item"><i class="fas fa-shirt"></i> Uniformes e Produtos</a>
+        <a href="financeiro.html" class="menu-item"><i class="fas fa-chart-pie"></i> Financeiro</a>
+    </aside>
+
+    <main class="main-content">
+        <header class="header-dash">
+            <div>
+                <h1><i class="fas fa-users"></i> Gestão de Alunos</h1>
+                <p>Controle de pagamentos, edições e matrículas.</p>
+            </div>
+            <div class="presentes-box">
+                <span>Mensalidades Atrasadas</span>
+                <strong id="val-atrasados">0</strong>
+            </div>
+        </header>
+
+        <div class="toolbar">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="input-pesquisa" placeholder="Pesquisar aluno..." onkeyup="filtrarTabela()">
+            </div>
+            <select id="filtro-forma-pagamento" class="filtro-pagamento" title="Filtrar por forma de pagamento" aria-label="Forma de pagamento" onchange="carregarTabela()">
+                <option value="">Todas as formas de pagamento</option>
+                <option value="PIX">PIX</option>
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                <option value="Cartão de Débito">Cartão de Débito</option>
+                <option value="Não informado">Não informado</option>
+            </select>
+            <select id="filtro-status-financeiro" class="filtro-status" title="Filtrar por status financeiro" aria-label="Status financeiro" onchange="carregarTabela()">
+                <option value="">Todos os status</option>
+                <option value="Pago">Pago</option>
+                <option value="Devedor">Devedor</option>
+            </select>
+        </div>
+
+        <div class="table-container">
+            <table id="tabela-alunos">
+                <thead>
+                    <tr>
+                        <th>Atleta</th>
+                        <th>Responsável / Data Início</th>
+                        <th>Status Financeiro</th>
+                        <th>Ações Administrativas</th>
+                    </tr>
+                </thead>
+                <tbody id="corpo-tabela">
+                </tbody>
+            </table>
+        </div>
+
+        <section class="inadimplentes-box">
+            <div class="inadimplentes-header">
+                <h3><i class="fas fa-triangle-exclamation"></i> Relatório de Inadimplentes</h3>
+                <button id="btn-cobranca-lote" class="btn-cobranca-lote" onclick="cobrarTodosInadimplentes()" disabled>
+                    <i class="fab fa-whatsapp"></i> Cobrar todos inadimplentes
+                </button>
+            </div>
+            <div id="lista-inadimplentes" class="inadimplentes-lista"></div>
+        </section>
+
+    </main>
+
+    <script src="auth.js"></script>
+    <script>
+        let inadimplentesAtuais = [];
+
+        function obterAlunosLocalStorage() {
+            const dados = localStorage.getItem('futpass_alunos') || localStorage.getItem('alunosCadastrados');
+            if (!dados) return [];
+            try {
+                return JSON.parse(dados);
+            } catch {
+                return [];
+            }
+        }
+
+        function salvarAlunosLocalStorage(alunos) {
+            localStorage.setItem('futpass_alunos', JSON.stringify(alunos));
+        }
+
+        function salvarAlunoLocalmente(aluno) {
+            const alunos = obterAlunosLocalStorage();
+            const index = alunos.findIndex(a => a.id === aluno.id);
+            if (index >= 0) {
+                alunos[index] = Object.assign(alunos[index], aluno);
+            } else {
+                alunos.push(aluno);
+            }
+            salvarAlunosLocalStorage(alunos);
+        }
+
+        function renderEstadoVazio(tbody, mensagem, temRecuperacaoLocal = false) {
+            tbody.innerHTML = '';
+            const tr = document.createElement('tr');
+            const td = document.createElement('td');
+            td.colSpan = 4;
+
+            const box = document.createElement('div');
+            box.className = 'empty-state-box';
+
+            const strong = document.createElement('strong');
+            strong.textContent = temRecuperacaoLocal ? 'Cadastros locais encontrados neste navegador' : 'Nenhum aluno cadastrado';
+            box.appendChild(strong);
+
+            const span = document.createElement('span');
+            span.textContent = mensagem || '';
+            box.appendChild(span);
+
+            if (temRecuperacaoLocal) {
+                box.appendChild(document.createElement('br'));
+                const restoreButton = document.createElement('button');
+                restoreButton.type = 'button';
+                restoreButton.className = 'btn-restaurar';
+                restoreButton.textContent = 'Restaurar alunos locais para o sistema';
+                restoreButton.addEventListener('click', restaurarCadastrosLocais);
+                box.appendChild(restoreButton);
+            }
+
+            td.appendChild(box);
+            tr.appendChild(td);
+            tbody.appendChild(tr);
+        }
+
+        async function importarAlunosLocalStorageParaServidor(alunosLocal) {
+            if (!alunosLocal || !alunosLocal.length) return;
+            for (const alunoOriginal of alunosLocal) {
+                const aluno = {
+                    ...alunoOriginal,
+                    id: alunoOriginal.id || 'ALUNO-' + Math.floor(Math.random() * 1000000),
+                    dataCriacao: alunoOriginal.dataCriacao || new Date().toISOString(),
+                    statusMatricula: alunoOriginal.statusMatricula || 'Ativo',
+                    statusFinanceiro: alunoOriginal.statusFinanceiro || 'Pago',
+                    avatar: alunoOriginal.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(alunoOriginal.nome || 'Aluno')
+                };
+                try {
+                    await fetch('/api/alunos', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(aluno)
+                    });
+                } catch (error) {
+                    console.warn('Não foi possível importar aluno para o servidor:', aluno.nome, error);
+                }
+            }
+        }
+
+        async function restaurarCadastrosLocais() {
+            const alunosLocal = obterAlunosLocalStorage();
+            if (!alunosLocal.length) {
+                await carregarTabela();
+                return;
+            }
+
+            await importarAlunosLocalStorageParaServidor(alunosLocal);
+            await carregarTabela();
+        }
+
+        async function carregarTabela() {
+            const tbody = document.getElementById('corpo-tabela');
+            tbody.innerHTML = '';
+
+            let bancoDeDadosAlunos = [];
+            let mensagemErro = null;
+
+            try {
+                try {
+                    const response = await fetch('/api/alunos');
+                    if (!response.ok) throw new Error('Não foi possível carregar a lista de alunos do servidor.');
+                    bancoDeDadosAlunos = await response.json();
+                    if (bancoDeDadosAlunos.length) {
+                        salvarAlunosLocalStorage(bancoDeDadosAlunos);
+                    }
+
+                    if (!bancoDeDadosAlunos.length) {
+                        const localAlunos = obterAlunosLocalStorage();
+                        if (localAlunos.length) {
+                            await importarAlunosLocalStorageParaServidor(localAlunos);
+                            const response2 = await fetch('/api/alunos');
+                            if (response2.ok) bancoDeDadosAlunos = await response2.json();
+                            if (!bancoDeDadosAlunos.length) bancoDeDadosAlunos = localAlunos;
+                        }
+                    }
+                } catch (fetchError) {
+                    mensagemErro = fetchError.message;
+                    const localAlunos = obterAlunosLocalStorage();
+                    if (localAlunos.length) {
+                        bancoDeDadosAlunos = localAlunos;
+                    }
+                }
+
+                if (bancoDeDadosAlunos.length === 0) {
+                    document.getElementById('val-atrasados').innerText = '0';
+                    const localAlunos = obterAlunosLocalStorage();
+                    if (localAlunos.length) {
+                        renderEstadoVazio(tbody, 'O banco atual está vazio, mas este navegador ainda possui cadastros salvos localmente. Você pode restaurá-los para o sistema.', true);
+                    } else {
+                        renderEstadoVazio(tbody, mensagemErro || 'Nenhum aluno cadastrado.');
+                    }
+                    renderRelatorioInadimplentes([]);
+                    return;
+                }
+
+                await atualizarDevedoresAutomaticamente(bancoDeDadosAlunos);
+                const filtroPagamento = document.getElementById('filtro-forma-pagamento').value;
+                const filtroStatus = document.getElementById('filtro-status-financeiro').value;
+                if (filtroPagamento) {
+                    bancoDeDadosAlunos = bancoDeDadosAlunos.filter(aluno => {
+                        const forma = aluno.formaPagamento || 'Não informado';
+                        return forma === filtroPagamento;
+                    });
+                }
+                if (filtroStatus) {
+                    bancoDeDadosAlunos = bancoDeDadosAlunos.filter(aluno => aluno.statusFinanceiro === filtroStatus);
+                }
+
+                if (bancoDeDadosAlunos.length === 0) {
+                    document.getElementById('val-atrasados').innerText = '0';
+                    tbody.innerHTML = '';
+                    const tr = document.createElement('tr');
+                    const td = document.createElement('td');
+                    td.colSpan = 4;
+                    td.style.textAlign = 'center';
+                    td.style.padding = '20px';
+                    td.style.color = '#94a3b8';
+                    td.textContent = 'Nenhum aluno encontrado para o filtro selecionado.';
+                    tr.appendChild(td);
+                    tbody.appendChild(tr);
+                    renderRelatorioInadimplentes([]);
+                    return;
+                }
+
+                const totalAtrasados = bancoDeDadosAlunos.filter(aluno => isMensalidadeAtrasada(aluno)).length;
+                document.getElementById('val-atrasados').innerText = String(totalAtrasados);
+
+                const inadimplentes = [];
+
+                [...bancoDeDadosAlunos].reverse().forEach(aluno => {
+                    const tr = document.createElement('tr');
+                    if (aluno.statusMatricula === 'Cancelado') tr.className = 'inativo';
+
+                    const dataFormatada = aluno.dataInicioPagamento ? new Date(aluno.dataInicioPagamento + 'T12:00:00Z').toLocaleDateString('pt-BR') : 'Não definida';
+                    const periodoPagamento = getPeriodoPagamento(aluno);
+                    const formaPagamento = aluno.formaPagamento || 'Não informado';
+                    const diasAtraso = getDiasAtraso(aluno);
+                    const estaAtrasado = diasAtraso > 0;
+
+                    if (aluno.statusMatricula === 'Ativo' && estaAtrasado) {
+                        inadimplentes.push({ aluno, diasAtraso });
+                    }
+
+                    // Coluna 1: Aluno + avatar
+                    const td1 = document.createElement('td');
+                    const alunoCell = document.createElement('div');
+                    alunoCell.className = 'aluno-cell';
+                    const img = document.createElement('img');
+                    img.className = 'aluno-avatar';
+                    const avatarUrl = String(aluno.avatar || '');
+                    img.src = (avatarUrl.startsWith('http') || avatarUrl.startsWith('data:')) ? avatarUrl : ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(aluno.nome || 'Aluno'));
+                    img.alt = aluno.nome || 'Aluno';
+                    alunoCell.appendChild(img);
+                    const infoDiv = document.createElement('div');
+                    const nomeSpan = document.createElement('span');
+                    nomeSpan.className = 'aluno-nome';
+                    nomeSpan.textContent = aluno.nome || 'Aluno sem nome';
+                    infoDiv.appendChild(nomeSpan);
+                    if (aluno.statusMatricula === 'Cancelado') {
+                        const badge = document.createElement('span');
+                        badge.className = 'badge-inativo';
+                        badge.textContent = 'Matrícula Cancelada';
+                        infoDiv.appendChild(badge);
+                    } else {
+                        const planInfo = document.createElement('span');
+                        planInfo.style.color = '#94a3b8';
+                        planInfo.style.fontSize = '0.8rem';
+                        planInfo.textContent = `${aluno.planoEscolhido || 'Plano não definido'} • ${formatCurrencyValue(getMensalidadeValor(aluno))}`;
+                        infoDiv.appendChild(planInfo);
+                    }
+                    alunoCell.appendChild(infoDiv);
+                    td1.appendChild(alunoCell);
+
+                    // Coluna 2: Responsável / Início / Ciclo / Pagamento
+                    const td2 = document.createElement('td');
+                    const respNome = document.createElement('span');
+                    respNome.className = 'resp-nome';
+                    respNome.textContent = aluno.respNome || '';
+                    td2.appendChild(respNome);
+                    const br1 = document.createElement('div');
+                    const span1 = document.createElement('span');
+                    span1.className = 'resp-tel';
+                    const icon1 = document.createElement('i');
+                    icon1.className = 'fas fa-calendar-alt';
+                    span1.appendChild(icon1);
+                    span1.appendChild(document.createTextNode(' Início: ' + dataFormatada));
+                    br1.appendChild(span1);
+                    td2.appendChild(br1);
+
+                    const br2 = document.createElement('div');
+                    const span2 = document.createElement('span');
+                    span2.className = 'resp-tel';
+                    const icon2 = document.createElement('i');
+                    icon2.className = 'fas fa-calendar-day';
+                    span2.appendChild(icon2);
+                    span2.appendChild(document.createTextNode(' Ciclo: ' + periodoPagamento));
+                    br2.appendChild(span2);
+                    td2.appendChild(br2);
+
+                    const br3 = document.createElement('div');
+                    const span3 = document.createElement('span');
+                    span3.className = 'resp-tel';
+                    const icon3 = document.createElement('i');
+                    icon3.className = 'fas fa-money-check-dollar';
+                    span3.appendChild(icon3);
+                    span3.appendChild(document.createTextNode(' Pagamento: ' + formaPagamento));
+                    br3.appendChild(span3);
+                    td2.appendChild(br3);
+
+                    // Coluna 3: Status Financeiro
+                    const td3 = document.createElement('td');
+                    if (aluno.statusMatricula === 'Ativo') {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn-pgto ' + (aluno.statusFinanceiro === 'Pago' ? 'pago' : 'devedor');
+                        btn.type = 'button';
+                        btn.innerHTML = `<i class="fas ${aluno.statusFinanceiro === 'Pago' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${aluno.statusFinanceiro === 'Pago' ? 'Pago' : 'Devedor'}`;
+                        btn.addEventListener('click', () => alternarPagamento(aluno.id));
+                        td3.appendChild(btn);
+
+                        const statusDesc = document.createElement('div');
+                        statusDesc.style.display = 'block';
+                        statusDesc.style.color = '#94a3b8';
+                        statusDesc.style.fontSize = '0.8rem';
+                        statusDesc.style.marginTop = '8px';
+                        const baseText = document.createTextNode(aluno.statusFinanceiro === 'Pago' ? 'Pagamento registrado para este mês.' : 'Cobrar responsável este mês.');
+                        statusDesc.appendChild(baseText);
+                        if (estaAtrasado) {
+                            const alerta = document.createElement('span');
+                            alerta.className = 'alerta-atraso';
+                            alerta.innerHTML = `<i class="fas fa-triangle-exclamation"></i> Vencido há ${diasAtraso} dia(s).`;
+                            statusDesc.appendChild(document.createTextNode(' '));
+                            statusDesc.appendChild(alerta);
+                        }
+                        td3.appendChild(statusDesc);
+
+                        if (estaAtrasado) {
+                            const btCob = document.createElement('button');
+                            btCob.className = 'btn-cobranca';
+                            btCob.type = 'button';
+                            btCob.innerHTML = `<i class="fab fa-whatsapp"></i> Cobrar no WhatsApp`;
+                            btCob.addEventListener('click', () => cobrarNoWhatsApp(aluno.id));
+                            td3.appendChild(btCob);
+                        }
+                    } else {
+                        const inativoSpan = document.createElement('span');
+                        inativoSpan.style.color = '#64748b';
+                        inativoSpan.textContent = 'Inativo';
+                        td3.appendChild(inativoSpan);
+                    }
+
+                    // Coluna 4: Ações
+                    const td4 = document.createElement('td');
+                    const acoes = document.createElement('div');
+                    acoes.className = 'acoes-container';
+
+                    const btnVendas = document.createElement('button');
+                    btnVendas.className = 'acoes-btn vendas';
+                    btnVendas.title = 'Lançar Vendas';
+                    btnVendas.type = 'button';
+                    btnVendas.innerHTML = '<i class="fas fa-shirt"></i>';
+                    btnVendas.addEventListener('click', () => abrirVendasAluno(aluno.id));
+                    acoes.appendChild(btnVendas);
+
+                    const btnEditar = document.createElement('button');
+                    btnEditar.className = 'acoes-btn editar';
+                    btnEditar.title = 'Editar Cadastro';
+                    btnEditar.type = 'button';
+                    btnEditar.innerHTML = '<i class="fas fa-edit"></i>';
+                    btnEditar.addEventListener('click', () => editarAluno(aluno.id));
+                    acoes.appendChild(btnEditar);
+
+                    if (aluno.statusMatricula === 'Ativo') {
+                        const btnCancelar = document.createElement('button');
+                        btnCancelar.className = 'acoes-btn cancelar';
+                        btnCancelar.title = 'Inativar Matrícula (Saída)';
+                        btnCancelar.type = 'button';
+                        btnCancelar.innerHTML = '<i class="fas fa-user-slash"></i>';
+                        btnCancelar.addEventListener('click', () => cancelarMatricula(aluno.id));
+                        acoes.appendChild(btnCancelar);
+                    }
+
+                    const btnExcluir = document.createElement('button');
+                    btnExcluir.className = 'acoes-btn delete';
+                    btnExcluir.title = 'Excluir Definitivamente';
+                    btnExcluir.type = 'button';
+                    btnExcluir.innerHTML = '<i class="fas fa-trash"></i>';
+                    btnExcluir.addEventListener('click', () => excluirAlunoDefinitivo(aluno.id));
+                    acoes.appendChild(btnExcluir);
+
+                    td4.appendChild(acoes);
+
+                    tr.appendChild(td1);
+                    tr.appendChild(td2);
+                    tr.appendChild(td3);
+                    tr.appendChild(td4);
+                    tbody.appendChild(tr);
+                });
+
+                renderRelatorioInadimplentes(inadimplentes);
+            } catch (error) {
+                    tbody.innerHTML = '';
+                    const tr = document.createElement('tr');
+                    const td = document.createElement('td');
+                    td.colSpan = 4;
+                    td.style.textAlign = 'center';
+                    td.style.padding = '20px';
+                    td.style.color = '#f87171';
+                    td.textContent = error.message;
+                    tr.appendChild(td);
+                    tbody.appendChild(tr);
+            }
+        }
+
+        window.restaurarCadastrosLocais = restaurarCadastrosLocais;
+
+        async function fetchAlunoPorId(id) {
+            try {
+                const response = await fetch(`/api/alunos/${encodeURIComponent(id)}`);
+                if (!response.ok) throw new Error();
+                return response.json();
+            } catch {
+                const localAlunos = obterAlunosLocalStorage();
+                return localAlunos.find(a => a.id === id) || null;
+            }
+        }
+
+        async function alternarPagamento(id) {
+            const aluno = await fetchAlunoPorId(id);
+            if (!aluno) return;
+            aluno.statusFinanceiro = aluno.statusFinanceiro === 'Pago' ? 'Devedor' : 'Pago';
+            salvarAlunoLocalmente(aluno);
+            try {
+                const response = await fetch('/api/alunos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(aluno)
+                });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || 'Erro ao atualizar o servidor.');
+                }
+            } catch (error) {
+                console.warn('Falha ao atualizar status financeiro no servidor:', error);
+            }
+            await carregarTabela();
+        }
+
+        async function atualizarDevedoresAutomaticamente(alunos) {
+            const pendentes = alunos.filter(aluno => aluno.statusMatricula === 'Ativo' && aluno.statusFinanceiro !== 'Devedor' && getDiasAtraso(aluno) > 0);
+            if (!pendentes.length) return;
+
+            for (const aluno of pendentes) {
+                aluno.statusFinanceiro = 'Devedor';
+                salvarAlunoLocalmente(aluno);
+                try {
+                    await fetch('/api/alunos', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(aluno)
+                    });
+                } catch (error) {
+                    console.warn('Falha ao automatizar status devedor no servidor:', error);
+                }
+            }
+        }
+
+        function editarAluno(id) {
+            window.location.href = `cadastro.html?edit=${id}`;
+        }
+
+        function abrirVendasAluno(id) {
+            window.location.href = `uniformes.html?aluno=${encodeURIComponent(id)}`;
+        }
+
+        async function cancelarMatricula(id) {
+            const aluno = await fetchAlunoPorId(id);
+            if (!aluno) return;
+            aluno.statusMatricula = 'Cancelado';
+            aluno.dataCancelamento = new Date().toISOString();
+            salvarAlunoLocalmente(aluno);
+            try {
+                const response = await fetch('/api/alunos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(aluno)
+                });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || 'Erro ao atualizar o servidor.');
+                }
+            } catch (error) {
+                console.warn('Falha ao cancelar matrícula no servidor:', error);
+            }
+            carregarTabela();
+        }
+
+        async function excluirAlunoDefinitivo(id) {
+            const alunos = obterAlunosLocalStorage().filter(a => a.id !== id);
+            salvarAlunosLocalStorage(alunos);
+            try {
+                const response = await fetch(`/api/alunos/${encodeURIComponent(id)}`, { method: 'DELETE' });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || 'Erro ao excluir no servidor.');
+                }
+            } catch (error) {
+                console.warn('Falha ao excluir aluno no servidor:', error);
+            }
+            carregarTabela();
+        }
+
+        function filtrarTabela() {
+            const input = document.getElementById('input-pesquisa').value.toLowerCase();
+            const linhas = document.getElementById('corpo-tabela').getElementsByTagName('tr');
+            for (let i = 0; i < linhas.length; i++) {
+                let nomeAluno = linhas[i].getElementsByTagName('td')[0].textContent.toLowerCase();
+                let nomeResp = linhas[i].getElementsByTagName('td')[1].textContent.toLowerCase();
+                if (nomeAluno.includes(input) || nomeResp.includes(input)) { linhas[i].style.display = ''; } 
+                else { linhas[i].style.display = 'none'; }
+            }
+        }
+
+        function getValorPlano(planoEscolhido) {
+            const plano = String(planoEscolhido || '').toLowerCase();
+            const match = plano.match(/r\$\s*([\d.,]+)/i);
+            if (match && match[1]) {
+                const normalizado = match[1].replace(/\./g, '').replace(',', '.');
+                const valor = Number(normalizado);
+                if (!Number.isNaN(valor) && valor > 0) return valor;
+            }
+            if (plano.includes('3 vezes')) return 170;
+            if (plano.includes('2 vezes')) return 150;
+            if (plano.includes('1 vez')) return 130;
+            return 130;
+        }
+
+        function getMensalidadeValor(aluno) {
+            const valorManual = Number(aluno?.mensalidadeValor);
+            if (Number.isFinite(valorManual) && valorManual >= 0) return valorManual;
+            return getValorPlano(aluno?.planoEscolhido);
+        }
+
+        function formatCurrencyValue(value) {
+            return (Number(value) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function normalizarTelefoneWhatsapp(telefone) {
+            const digitos = String(telefone || '').replace(/\D/g, '');
+            if (!digitos) return '';
+            if (digitos.startsWith('55')) return digitos;
+            if (digitos.length === 10 || digitos.length === 11) return `55${digitos}`;
+            return digitos;
+        }
+
+        async function cobrarNoWhatsApp(id) {
+            const aluno = await fetchAlunoPorId(id);
+            if (!aluno) return;
+
+            const telefone = normalizarTelefoneWhatsapp(aluno.respTel);
+            if (!telefone) {
+                return;
+            }
+
+            const valor = formatCurrencyValue(getMensalidadeValor(aluno));
+            const diasAtraso = getDiasAtraso(aluno);
+            const cicloDevedor = getResumoCicloDevedor(aluno);
+            const vencimentoFormatado = getDataVencimentoFormatada(aluno);
+            const mensagem = `Olá, ${aluno.respNome}. A mensalidade de ${aluno.nome} está pendente (${valor}). Vencimento: ${vencimentoFormatado}. Ciclo em aberto: ${cicloDevedor}.${diasAtraso > 0 ? ` Está em atraso há ${diasAtraso} dia(s).` : ''} Pode regularizar por favor?`;
+            const url = `https://wa.me/${telefone}?text=${encodeURIComponent(mensagem)}`;
+            window.open(url, '_blank');
+        }
+
+        function cobrarTodosInadimplentes() {
+            if (!inadimplentesAtuais.length) {
+                return;
+            }
+
+            const comTelefone = inadimplentesAtuais.filter(item => normalizarTelefoneWhatsapp(item.aluno.respTel));
+            const semTelefone = inadimplentesAtuais.length - comTelefone.length;
+
+            if (!comTelefone.length) {
+                return;
+            }
+
+            comTelefone.forEach((item, index) => {
+                setTimeout(() => {
+                    const aluno = item.aluno;
+                    const telefone = normalizarTelefoneWhatsapp(aluno.respTel);
+                    const valor = formatCurrencyValue(getMensalidadeValor(aluno));
+                    const diasAtraso = getDiasAtraso(aluno);
+                    const cicloDevedor = getResumoCicloDevedor(aluno);
+                    const vencimentoFormatado = getDataVencimentoFormatada(aluno);
+                    const mensagem = `Olá, ${aluno.respNome}. A mensalidade de ${aluno.nome} está pendente (${valor}). Vencimento: ${vencimentoFormatado}. Ciclo em aberto: ${cicloDevedor}.${diasAtraso > 0 ? ` Está em atraso há ${diasAtraso} dia(s).` : ''} Pode regularizar por favor?`;
+                    const url = `https://wa.me/${telefone}?text=${encodeURIComponent(mensagem)}`;
+                    window.open(url, '_blank');
+                }, index * 250);
+            });
+
+            if (semTelefone > 0) {
+                console.warn(`${semTelefone} inadimplente(s) sem telefone válido para cobrança.`);
+            }
+        }
+
+        function renderRelatorioInadimplentes(inadimplentes) {
+            const container = document.getElementById('lista-inadimplentes');
+            const btnLote = document.getElementById('btn-cobranca-lote');
+            if (!container) return;
+
+            inadimplentesAtuais = inadimplentes;
+            if (btnLote) btnLote.disabled = inadimplentes.length === 0;
+
+            container.innerHTML = '';
+            if (!inadimplentes.length) {
+                const p = document.createElement('p');
+                p.className = 'inadimplente-vazio';
+                p.textContent = 'Nenhum aluno inadimplente no filtro atual.';
+                container.appendChild(p);
+                return;
+            }
+
+            inadimplentes
+                .sort((a, b) => b.diasAtraso - a.diasAtraso)
+                .forEach(({ aluno, diasAtraso }) => {
+                    const valor = formatCurrencyValue(getMensalidadeValor(aluno));
+                    const cicloDevedor = getResumoCicloDevedor(aluno);
+                    const vencimentoFormatado = getDataVencimentoFormatada(aluno);
+
+                    const item = document.createElement('div');
+                    item.className = 'inadimplente-item';
+
+                    const descricao = document.createElement('p');
+                    const strongAluno = document.createElement('strong');
+                    strongAluno.textContent = 'Aluno:';
+                    descricao.appendChild(strongAluno);
+                    descricao.appendChild(document.createTextNode(' ' + (aluno.nome || '') + ' • ' + (aluno.respNome || '')));
+                    descricao.appendChild(document.createElement('br'));
+                    descricao.appendChild(document.createTextNode('Plano: ' + (aluno.planoEscolhido || 'Não definido') + ' • Valor: ' + valor));
+                    descricao.appendChild(document.createElement('br'));
+                    const strongVenc = document.createElement('strong');
+                    strongVenc.textContent = 'Vencimento:';
+                    descricao.appendChild(strongVenc);
+                    descricao.appendChild(document.createTextNode(' ' + vencimentoFormatado + ' • '));
+                    const strongCiclo = document.createElement('strong');
+                    strongCiclo.textContent = 'Ciclo devedor:';
+                    descricao.appendChild(strongCiclo);
+                    descricao.appendChild(document.createTextNode(' ' + cicloDevedor + ' • Atraso: ' + Math.max(diasAtraso, 0) + ' dia(s)'));
+                    item.appendChild(descricao);
+
+                    const button = document.createElement('button');
+                    button.className = 'btn-cobranca';
+                    button.type = 'button';
+                    button.addEventListener('click', () => cobrarNoWhatsApp(aluno.id));
+                    const icon = document.createElement('i');
+                    icon.className = 'fab fa-whatsapp';
+                    button.appendChild(icon);
+                    button.appendChild(document.createTextNode(' Enviar cobrança'));
+                    item.appendChild(button);
+
+                    container.appendChild(item);
+                });
+        }
+
+        function formatMonthYear(date) {
+            const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            return `${meses[date.getMonth()]}/${date.getFullYear()}`;
+        }
+
+        function getCicloAtual() {
+            return formatMonthYear(new Date());
+        }
+
+        function getPeriodoPagamento(aluno) {
+            if (!aluno.dataInicioPagamento) return 'Não definida';
+            const inicio = new Date(aluno.dataInicioPagamento + 'T12:00:00Z');
+            if (Number.isNaN(inicio.getTime())) return 'Não definida';
+            const hoje = new Date();
+            const inicioLabel = formatMonthYear(inicio);
+            const atualLabel = formatMonthYear(hoje);
+            return inicioLabel === atualLabel ? inicioLabel : `${inicioLabel} → ${atualLabel}`;
+        }
+
+        function getDiasAtraso(aluno) {
+            if (aluno.statusMatricula !== 'Ativo' || !aluno.dataInicioPagamento) return 0;
+
+            const primeiroVencido = getPrimeiroVencimentoEmAtraso(aluno);
+            if (!primeiroVencido) return 0;
+            const hoje = new Date();
+
+            if (hoje <= primeiroVencido) return 0;
+
+            const diffMs = hoje.getTime() - primeiroVencido.getTime();
+            return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        }
+
+        function getDataVencimentoAtual(aluno) {
+            if (!aluno || !aluno.dataInicioPagamento) return null;
+            const inicio = new Date(aluno.dataInicioPagamento + 'T12:00:00Z');
+            if (Number.isNaN(inicio.getTime())) return null;
+
+            const hoje = new Date();
+            const diaBase = inicio.getDate();
+            const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
+            const diaVencimento = Math.min(diaBase, ultimoDiaMes);
+            return new Date(hoje.getFullYear(), hoje.getMonth(), diaVencimento, 23, 59, 59);
+        }
+
+        function getDataVencimentoFormatada(aluno) {
+            const data = getPrimeiroVencimentoEmAtraso(aluno) || getDataVencimentoAtual(aluno);
+            if (!data) return 'Não definido';
+            return data.toLocaleDateString('pt-BR');
+        }
+
+        function getPrimeiroVencimentoEmAtraso(aluno) {
+            const ciclosVencidos = getCiclosVencidosNaoPagos(aluno);
+            return ciclosVencidos.length ? ciclosVencidos[0].vencimento : null;
+        }
+
+        function getUltimoPagamentoDate(aluno) {
+            if (!aluno || !aluno.dataUltimoPagamento) return null;
+            const data = new Date(aluno.dataUltimoPagamento + 'T12:00:00Z');
+            if (Number.isNaN(data.getTime())) return null;
+            return data;
+        }
+
+        function getCiclosVencidosNaoPagos(aluno) {
+            if (!aluno || !aluno.dataInicioPagamento || aluno.statusMatricula !== 'Ativo') return [];
+
+            const inicio = new Date(aluno.dataInicioPagamento + 'T12:00:00Z');
+            if (Number.isNaN(inicio.getTime())) return [];
+
+            const ultimoPagamento = getUltimoPagamentoDate(aluno);
+            const hoje = new Date();
+            const diaBase = inicio.getDate();
+            const ciclos = [];
+
+            let cursor = new Date(inicio.getFullYear(), inicio.getMonth(), 1);
+            const limite = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+
+            while (cursor <= limite) {
+                const ano = cursor.getFullYear();
+                const mes = cursor.getMonth();
+                const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
+                const diaVencimento = Math.min(diaBase, ultimoDiaMes);
+                const vencimento = new Date(ano, mes, diaVencimento, 23, 59, 59);
+
+                const cicloVencido = hoje > vencimento;
+                const cicloPago = ultimoPagamento && (
+                    ultimoPagamento.getFullYear() > ano ||
+                    (ultimoPagamento.getFullYear() === ano && ultimoPagamento.getMonth() >= mes)
+                );
+
+                if (cicloVencido && !cicloPago) {
+                    ciclos.push({
+                        ciclo: formatMonthYear(cursor),
+                        vencimento
+                    });
+                }
+
+                cursor.setMonth(cursor.getMonth() + 1);
+            }
+
+            return ciclos;
+        }
+
+        function getResumoCicloDevedor(aluno) {
+            const ciclos = getCiclosDevedores(aluno);
+            if (ciclos.length <= 3) return ciclos.join(', ');
+            return `${ciclos[0]} até ${ciclos[ciclos.length - 1]} (${ciclos.length} ciclos)`;
+        }
+
+        function getCiclosDevedores(aluno) {
+            const ciclos = getCiclosVencidosNaoPagos(aluno).map(item => item.ciclo);
+            return ciclos.length ? ciclos : [formatMonthYear(new Date())];
+        }
+
+        function isMensalidadeAtrasada(aluno) {
+            return getDiasAtraso(aluno) > 0;
+        }
+
+        window.onload = async () => {
+            const user = await FutPassAuth.requireAuthPage();
+            if (!user) return;
+            await carregarTabela();
+        };
+    </script>
+</body>
+</html>
+
